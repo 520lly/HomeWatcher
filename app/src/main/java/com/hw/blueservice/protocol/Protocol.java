@@ -147,7 +147,7 @@ public class Protocol {
         dataPacket[3] = DataPacketSourceType;                         //Source Type
         Log.d(TAG,"st dataPacket[3] = "+(int)dataPacket[3]);
         dataPacket[4] = cflag;                                        //cflag
-        Log.d(TAG,"len dataPacket[4] = "+(int)dataPacket[4]);
+        Log.d(TAG,"cflag dataPacket[4] = "+(int)dataPacket[4]);
 
         dataPacket[5] = getByteOfChar(seq,XSBType.LSB);                //seq lsb
         Log.d(TAG,"seq lsb dataPacket[5] = "+(int)dataPacket[5]);

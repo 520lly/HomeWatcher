@@ -58,6 +58,7 @@ public class ClientSocketActivity extends Activity {
     public static final int ACTION_BLUETOOTH_REQ_CLEAR_SEND_DATA = 6;
     public static final int ACTION_BLUETOOTH_REQ_CLEAR_REV_DATA = 7;
     public static final int ACTION_BLUETOOTH_WRITE_NULL_SOCKET = 8;
+    public static final int ACTION_BLUETOOTH_UPDATE_CHANNLE_INFO = 9;
 
     private final Handler handler = new Handler() {
         @Override
@@ -240,7 +241,10 @@ public class ClientSocketActivity extends Activity {
                     Toast.makeText(sContext, "not connected!" ,Toast.LENGTH_SHORT).show();
                     break;
 
-
+                case ACTION_BLUETOOTH_UPDATE_CHANNLE_INFO:
+                    successTV.setText(""+(int)Protocol.scid);
+                    errorTV.setText(""+(int)Protocol.dcid);
+                    break;
             }
         }
     };
@@ -291,6 +295,7 @@ public class ClientSocketActivity extends Activity {
         filter.addAction(BluetoothService.ACTION_BLUETOOTH_WRITE_BULL_SOCKET);
         filter.addAction(BluetoothService.ACTION_BLUETOOTH_WRITE_FAIL);
         filter.addAction(BluetoothService.ACTION_BLUETOOTH_DATA_RECIEVED);
+        filter.addAction(BluetoothService.ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO);
 
 
         registerReceiver(messageReceiver, filter);
@@ -445,6 +450,12 @@ public class ClientSocketActivity extends Activity {
                 msg.setData(bundle);
                 handler.sendMessage(msg);
 
+            }else if(action.equals
+                    (BluetoothService.ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO)){
+                Message msg = handler
+                        .obtainMessage(ClientSocketActivity.ACTION_BLUETOOTH_UPDATE_CHANNLE_INFO);
+                msg.setData(bundle);
+                handler.sendMessage(msg);
             }
 
 
