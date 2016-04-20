@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.hw.main.AppPeference;
 
 import com.hw.main.R;
 
@@ -45,7 +46,6 @@ public class ClientSocketActivity extends Activity {
     private int testPacketSize = 10;                                  //10packets start from 1
 
 
-    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FA");
 
 
 
@@ -69,10 +69,10 @@ public class ClientSocketActivity extends Activity {
                     LogDataSB.append("connect to "+device.getName()+" successed!\n");
                     dataRevTV.setText(LogDataSB.toString());
                     Toast.makeText(sContext, "connect successed!" ,Toast.LENGTH_SHORT).show();
-                    String name = "APP1";
                     if(mBluetoothService != null)
                     {
-                        mBluetoothService.WriteCMD(device, Protocol.createCommandReq(Common.EProtocolName.PN_A2S_CREATE_RFCOMMN_CH,                                Protocol.getCurIdentifier(), name.getBytes()));
+                        mBluetoothService.WriteCMD(device, Protocol.createCommandReq(Common.EProtocolName.PN_A2S_CREATE_RFCOMMN_CH,
+                                Protocol.getCurIdentifier(), AppPeference.AppName.getBytes()));
                     }
 
                     break;
@@ -321,7 +321,7 @@ public class ClientSocketActivity extends Activity {
         new Thread() {
             public void run() {
 
-                mBluetoothService.connect(device, MY_UUID);
+                mBluetoothService.connect(device, AppPeference.MY_UUID);
 
             }
 
@@ -371,7 +371,7 @@ public class ClientSocketActivity extends Activity {
     public void onConncBtnClicked(View view)
     {
         device = _bluetooth.getRemoteDevice("FC:35:E6:85:BE:73");
-        mBluetoothService.connect(device, MY_UUID);
+        mBluetoothService.connect(device, AppPeference.MY_UUID);
     }
 
     public void onClearBtnClicked(View view)

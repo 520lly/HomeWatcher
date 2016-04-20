@@ -29,6 +29,8 @@
         android:layout_height="100dp"
         android:id="@+id/dataSendET"
         android:layout_gravity="right"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:scrollbars="vertical"/>
 
     <LinearLayout
@@ -83,6 +85,14 @@
             android:layout_marginLeft="20dp"
             android:onClick="onDiscBtnClicked"/>
 
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="多包"
+            android:id="@+id/multiPackets_cb"
+            android:checked="false"
+            android:layout_marginLeft="20dp"/>
+
     </LinearLayout>
 
     <LinearLayout
@@ -93,7 +103,7 @@
         <TextView
             android:layout_width="100dip"
             android:layout_height="50dip"
-            android:text="success:"
+            android:text="scid:"
             android:id="@+id/textView"
             android:gravity="center|center_vertical|fill_vertical"
             android:textSize="25sp" />
@@ -105,6 +115,18 @@
             android:gravity="center|center_vertical|fill_vertical"
             android:textSize="25sp"
             android:text="0" />
+
+        <EditText
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:ems="10"
+            android:id="@+id/payloadSizeET"
+            android:layout_weight="0.35"
+            android:layout_marginLeft="100dp"
+            android:hint="payload"
+            android:layout_marginRight="20dp" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -117,7 +139,7 @@
         <TextView
             android:layout_width="100dip"
             android:layout_height="50dip"
-            android:text="error:"
+            android:text="dcid:"
             android:id="@+id/textView2"
             android:gravity="center|center_vertical|fill_vertical"
             android:textSize="25sp" />
@@ -129,6 +151,16 @@
             android:gravity="center|center_vertical|fill_vertical"
             android:textSize="25sp"
             android:text="0" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/packetNumET"
+            android:layout_weight="1"
+            android:layout_marginLeft="100dp"
+            android:layout_marginRight="20dp"
+            android:hint="packetNum"
+            android:inputType="number" />
     </LinearLayout>
 
 </LinearLayout><!-- From: file:/home/saic/AndroidStudioProjects/HomeWatcher/app3/src/main/res/layout/client_socket.xml -->

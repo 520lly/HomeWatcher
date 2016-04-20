@@ -68,7 +68,7 @@ public class Common {
 	uint8_t result;
 	uint16_t scid;
 	uint16_t dcid;                                   //APP RFCOMM Channel or HMI UNIX Domain Socket Channel
-	uint8_t data[SppCRCPacketLenMax];
+	uint8_t data[];
      */
     public class EResponsePacketFieldIndex
     {
@@ -91,6 +91,47 @@ public class Common {
                     "RESULT",
                     "SCID",
                     "DCID",
+                    "PAYLOAD",
+                    "FINISH",
+                    "DETECTEDBAD",
+            };
+
+
+    /*
+    uint8_t len1;
+    uint8_t len2;
+    uint8_t st;                     //indicate data source (Android or iOS)
+    uint8_t cflag;                  //indicate packet Sequence
+    uint16_t seq;
+    uint16_t scid;
+    uint16_t dcid;
+    uint16_t dsize;
+        */
+    public class EDataPacketFieldIndex
+    {
+        static final public byte  DataPacketFieldIndexLEN1             = 0X00;                                   //match with CmdPacket code
+        static final public byte  DataPacketFieldIndexLEN2             = 0X01;                             //match with CmdPacket identifier
+        static final public byte  DataPacketFieldIndexST               = 0X02;
+        static final public byte  DataPacketFieldIndexCFLAG            = 0X03;
+        static final public byte  DataPacketFieldIndexSEQ              = 0X04;
+        static final public byte  DataPacketFieldIndexSCID             = 0X05;
+        static final public byte  DataPacketFieldIndexDCID             = 0X06;                                   //APP RFCOMM Channel or HMI UNIX Domain Socket Channel
+        static final public byte  DataPacketFieldIndexDSIZE            = 0X07;                                  //APP RFCOMM Channel or HMI UNIX Domain Socket Channel
+        static final public byte  DataPacketFieldIndexPAYLOAD          = 0X08;
+        static final public byte  DataPacketFieldIndexFINISH           = 0X09;
+        static final public byte  DataPacketFieldIndexDETECTEDBAD      = 0X0A;
+
+    }
+    public static String[] stateDataPacket =
+            {
+                    "LEN1",
+                    "LEN2",
+                    "ST",
+                    "CFLAG",
+                    "SEQ",
+                    "SCID",
+                    "DCID",
+                    "DSIZE",
                     "PAYLOAD",
                     "FINISH",
                     "DETECTEDBAD",

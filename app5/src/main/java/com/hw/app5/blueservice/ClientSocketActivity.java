@@ -16,12 +16,15 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.hw.app5.blueservice.protocol.*;
 import com.hw.app5.R;
+import com.hw.app5.main.AppPeference;
 
 import java.util.UUID;
 
@@ -32,12 +35,15 @@ public class ClientSocketActivity extends Activity {
     private BluetoothDevice device;
     private BluetoothAdapter _bluetooth = BluetoothAdapter.getDefaultAdapter();
     public static Context sContext;
-    private EditText dataSendET;
+    private EditText dataSendET,payloadSizeET,packetNumET;
     private TextView dataRevTV,successTV,errorTV;
+    private CheckBox multiPacketsCB;
     private ScrollView scrollView;
     private StringBuilder LogDataSB = new StringBuilder();
+    private boolean isMultiPackets = false;
+    private int testPacketSize = 10;                                  //10packets start from
 
-    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FE");
+
 
     public static final int ACTION_BLUETOOTH_CONNECT_SUCCESSED = 0;
     public static final int ACTION_BLUETOOTH_CONNECT_FAIL = 1;
@@ -47,6 +53,8 @@ public class ClientSocketActivity extends Activity {
     public static final int ACTION_BLUETOOTH_REQ_SEND_DATA = 5;
     public static final int ACTION_BLUETOOTH_REQ_CLEAR_SEND_DATA = 6;
     public static final int ACTION_BLUETOOTH_REQ_CLEAR_REV_DATA = 7;
+    public static final int ACTION_BLUETOOTH_WRITE_NULL_SOCKET = 8;
+    public static final int ACTION_BLUETOOTH_UPDATE_CHANNLE_INFO = 9;
 
     private final Handler handler = new Handler() {
         @Override
@@ -57,8 +65,12 @@ public class ClientSocketActivity extends Activity {
                     LogDataSB.append("connect to "+device.getName()+" successed!\n");
                     dataRevTV.setText(LogDataSB.toString());
                     Toast.makeText(sContext, "connect successed!" ,Toast.LENGTH_SHORT).show();
-                    String name = "APP5";
-                    mBluetoothService.WriteCMD(device, Protocol.createCommandReq(Common.EProtocolName.PN_A2S_CREATE_RFCOMMN_CH, Protocol.getCurIdentifier(), name.getBytes()));
+                    if(mBluetoothService != null)
+                    {
+                        mBluetoothService.WriteCMD(device, Protocol.createCommandReq(Common.EProtocolName.PN_A2S_CREATE_RFCOMMN_CH,
+                                Protocol.getCurIdentifier(), AppPeference.AppName.getBytes()));
+                    }
+
                     break;
                 case ACTION_BLUETOOTH_CONNECT_FAIL:
                     LogDataSB.append("connect to "+device.getName()+" fail!\n");
@@ -90,12 +102,122 @@ public class ClientSocketActivity extends Activity {
 
                 case ACTION_BLUETOOTH_REQ_SEND_DATA:
                     String data = dataSendET.getText().toString();
-                    LogDataSB.append("Me:"+data + "\n");
-                    dataRevTV.setText(LogDataSB.toString());
+                    String num = packetNumET.getText().toString();
 
+                    if(!num.equals(""))
+                    {
+                        testPacketSize = Integer.valueOf(num).intValue();
+                    }
+                    else
+                    {
+                        testPacketSize = 10;
+                    }
+
+                    Log.d(TAG, "isMultiPackets="+isMultiPackets +"   seq="+(int)Protocol.seq+ "    testPacketSize = "
+                            +testPacketSize +"   seqIndex="+(int)Protocol.seqIndex);
                     if(mBluetoothService != null)
                     {
-                        mBluetoothService.WriteCMD(device,dataSendET.getText().toString().getBytes());
+                        if(isMultiPackets)
+                        {
+                            if(Protocol.seq == 0)
+                            {
+                                Protocol.seqIndex = Common.EPacketSequenceIndex.PSI_START;
+                                Protocol.seq += 1;
+                            }
+                            else
+                            {
+                                Protocol.seqIndex = Common.EPacketSequenceIndex.PSI_CONTINUTION;
+                                if(Protocol.seq == testPacketSize)
+                                {
+                                    Protocol.seq = 0;
+                                    Protocol.seqIndex = Common.EPacketSequenceIndex.PSI_END;
+                                }
+                                Protocol.seq += 1;
+
+                            }
+                        }
+                        else
+                        {
+                            Protocol.seqIndex = Common.EPacketSequenceIndex.PSI_SINGLE;
+                        }
+                        String size = payloadSizeET.getText().toString();
+                        int setPayloadSize = 0;
+                        byte[] testMaxPayload;
+                        Log.d(TAG, "payloadSizeET = "+size);
+                        if(!size.equals(""))
+                        {
+
+                            setPayloadSize = Integer.valueOf(size).intValue();
+                        }
+                        else
+                        {
+                            setPayloadSize = Protocol.DataPacketDefaultLen;
+                        }
+
+
+
+                        if(setPayloadSize <= Protocol.MAX_DATA_PACKET_PAYLOAD_SIZE && setPayloadSize >= Protocol.MIN_DATA_PACKET_PAYLOAD_SIZE)
+                        {
+                            testMaxPayload = new byte[setPayloadSize];
+                        }
+                        else
+                        {
+                            testMaxPayload = new byte[Protocol.MAX_DATA_PACKET_PAYLOAD_SIZE];
+                            Toast.makeText(sContext, "max payload size = "+Protocol.MAX_DATA_PACKET_PAYLOAD_SIZE ,Toast.LENGTH_SHORT).show();
+
+                        }
+
+                        int userDataLen = dataSendET.getText().toString().getBytes().length;
+                        Log.d(TAG,"DataPacketMaxLen = "+testMaxPayload.length + "    setPayloadSize="+setPayloadSize+"    userDataLen="+userDataLen);
+
+                        for(int i = 0; i < testMaxPayload.length; )
+                        {
+                            if(testMaxPayload.length > userDataLen)
+                            {
+
+                                for(int j = 0; j < userDataLen; j++)
+                                {
+                                    if(i+j < testMaxPayload.length)
+                                    {
+                                        testMaxPayload[i+j] = dataSendET.getText().toString().getBytes()[j];
+                                    }
+                                }
+
+
+                                i+=userDataLen;
+                                Log.d(TAG,"i = "+i+"   testMaxPayload.length = "+testMaxPayload.length);
+                                if(i > testMaxPayload.length)
+                                {
+                                    i-=userDataLen;
+                                    int offset = testMaxPayload.length - i;
+
+                                    for(int j = 0; j < offset; j++)
+                                    {
+                                        Log.d(TAG,"i = "+i+"   j = "+j);
+                                        testMaxPayload[i+j] = dataSendET.getText().toString().getBytes()[j];
+                                    }
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                testMaxPayload[i] = dataSendET.getText().toString().getBytes()[i];
+                                i++;
+                            }
+                        }
+
+                        Log.d(TAG,"DataPacketMaxLen = "+testMaxPayload.length);
+                        if(mBluetoothService.WriteCMD(device, Protocol.createDataPacket(Protocol.len1, Protocol.len2,
+                                Protocol.seqIndex, Protocol.seq, Protocol.dcid, testMaxPayload)))
+                        {
+                            LogDataSB.append("Me:"+data + "* "+testMaxPayload.length+"\n");
+                            dataRevTV.setText(LogDataSB.toString());
+                        }
+                        else
+                        {
+                            Toast.makeText(sContext, "write data fail!" ,Toast.LENGTH_SHORT).show();
+                        }
+
                     }
                     break;
 
@@ -111,7 +233,14 @@ public class ClientSocketActivity extends Activity {
                     mBluetoothService.resetCounter();
                     break;
 
+                case ACTION_BLUETOOTH_WRITE_NULL_SOCKET:
+                    Toast.makeText(sContext, "not connected!" ,Toast.LENGTH_SHORT).show();
+                    break;
 
+                case ACTION_BLUETOOTH_UPDATE_CHANNLE_INFO:
+                    successTV.setText(""+(int)Protocol.scid);
+                    errorTV.setText(""+(int)Protocol.dcid);
+                    break;
             }
         }
     };
@@ -136,10 +265,22 @@ public class ClientSocketActivity extends Activity {
         sContext = getApplicationContext();
 
         dataSendET = (EditText)findViewById(R.id.dataSendET);
+        payloadSizeET = (EditText)findViewById(R.id.payloadSizeET);
+        packetNumET = (EditText)findViewById(R.id.packetNumET);
         dataRevTV = (TextView)findViewById(R.id.dataRevTV);
 
         successTV = (TextView)findViewById(R.id.tv_success);
         errorTV = (TextView)findViewById(R.id.tv_eror);
+        multiPacketsCB = (CheckBox)findViewById(R.id.multiPackets_cb);
+        multiPacketsCB.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                isMultiPackets = !isMultiPackets;
+                Protocol.seq = 0;
+                Protocol.seqIndex = Common.EPacketSequenceIndex.PSI_SINGLE;
+                Log.d(TAG, "isMultiPackets = "+isMultiPackets);
+            }
+        });
 
         bindBluetoothService();
 
@@ -147,8 +288,11 @@ public class ClientSocketActivity extends Activity {
         filter.addAction(BluetoothService.ACTION_BLUETOOTH_CONNECT_SUCCESSED);
         filter.addAction(BluetoothService.ACTION_BLUETOOTH_CONNECT_FAIL);
         filter.addAction(BluetoothService.ACTION_BLUETOOTH_WRITE_SUCCESS);
+        filter.addAction(BluetoothService.ACTION_BLUETOOTH_WRITE_BULL_SOCKET);
         filter.addAction(BluetoothService.ACTION_BLUETOOTH_WRITE_FAIL);
         filter.addAction(BluetoothService.ACTION_BLUETOOTH_DATA_RECIEVED);
+        filter.addAction(BluetoothService.ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO);
+
 
         registerReceiver(messageReceiver, filter);
 
@@ -173,7 +317,7 @@ public class ClientSocketActivity extends Activity {
         new Thread() {
             public void run() {
 
-                mBluetoothService.connect(device, MY_UUID);
+                mBluetoothService.connect(device, AppPeference.MY_UUID);
 
             }
 
@@ -223,7 +367,7 @@ public class ClientSocketActivity extends Activity {
     public void onConncBtnClicked(View view)
     {
         device = _bluetooth.getRemoteDevice("FC:35:E6:85:BE:73");
-        mBluetoothService.connect(device, MY_UUID);
+        mBluetoothService.connect(device, AppPeference.MY_UUID);
     }
 
     public void onClearBtnClicked(View view)
@@ -232,6 +376,7 @@ public class ClientSocketActivity extends Activity {
         handler.sendMessage(msg);
 
     }
+
 
     private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         private String StringExtra = "";
@@ -279,6 +424,13 @@ public class ClientSocketActivity extends Activity {
                 msg.setData(bundle);
                 handler.sendMessage(msg);
 
+            }else if (action
+                    .equals(BluetoothService.ACTION_BLUETOOTH_WRITE_BULL_SOCKET)){
+                Message msg = handler
+                        .obtainMessage(ClientSocketActivity.ACTION_BLUETOOTH_WRITE_NULL_SOCKET);
+                msg.setData(bundle);
+                handler.sendMessage(msg);
+
             }else if(action
                     .equals(BluetoothService.ACTION_BLUETOOTH_DATA_RECIEVED)) {
                 dataLength = intent.getIntExtra("DATA_REV_FROM_BT_LENGTH", 0);
@@ -294,6 +446,12 @@ public class ClientSocketActivity extends Activity {
                 msg.setData(bundle);
                 handler.sendMessage(msg);
 
+            }else if(action.equals
+                    (BluetoothService.ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO)){
+                Message msg = handler
+                        .obtainMessage(ClientSocketActivity.ACTION_BLUETOOTH_UPDATE_CHANNLE_INFO);
+                msg.setData(bundle);
+                handler.sendMessage(msg);
             }
 
 

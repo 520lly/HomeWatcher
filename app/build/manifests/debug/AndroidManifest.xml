@@ -48,7 +48,7 @@
         <!-- 接受蓝牙数据服务 -->
         <service android:enabled="true" android:exported="false" android:name="com.hw.blueservice.BluetoothService"/>
     </application>
-    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="19"/>
+    <uses-sdk android:minSdkVersion="11" android:targetSdkVersion="19"/>
 
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
