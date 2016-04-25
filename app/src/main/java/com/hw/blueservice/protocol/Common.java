@@ -26,7 +26,7 @@ public class Common {
         //HMI to SPP
         static final public byte PN_RESERVED              = 0x00;
         static final public byte PN_A2S_CREATE_RFCOMMN_CH = 0x01;
-
+        static final public byte PN_A2S_CDELETE_RFCOMMN_CH = 0x03;
 
     }
 

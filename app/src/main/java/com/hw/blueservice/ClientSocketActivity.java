@@ -59,6 +59,9 @@ public class ClientSocketActivity extends Activity {
     public static final int ACTION_BLUETOOTH_REQ_CLEAR_REV_DATA = 7;
     public static final int ACTION_BLUETOOTH_WRITE_NULL_SOCKET = 8;
     public static final int ACTION_BLUETOOTH_UPDATE_CHANNLE_INFO = 9;
+    public static final int ACTION_BLUETOOTH_REQ_DISC_CH = 10;
+    public static final int ACTION_BLUETOOTH_REQ_CONNECT_CH = 11;
+
 
     private final Handler handler = new Handler() {
         @Override
@@ -69,7 +72,7 @@ public class ClientSocketActivity extends Activity {
                     LogDataSB.append("connect to "+device.getName()+" successed!\n");
                     dataRevTV.setText(LogDataSB.toString());
                     Toast.makeText(sContext, "connect successed!" ,Toast.LENGTH_SHORT).show();
-                    if(mBluetoothService != null)
+                    if(mBluetoothService != null && BluetoothService.btSocket != null)
                     {
                         mBluetoothService.WriteCMD(device, Protocol.createCommandReq(Common.EProtocolName.PN_A2S_CREATE_RFCOMMN_CH,
                                 Protocol.getCurIdentifier(), AppPeference.AppName.getBytes()));
@@ -79,10 +82,13 @@ public class ClientSocketActivity extends Activity {
                 case ACTION_BLUETOOTH_CONNECT_FAIL:
                     LogDataSB.append("connect to "+device.getName()+" fail!\n");
                     dataRevTV.setText(LogDataSB.toString());
+                    successTV.setText("");
+                    errorTV.setText("");
+
+                    BluetoothService.btSocket = null;
                     Toast.makeText(sContext, "connect fail!" ,Toast.LENGTH_SHORT).show();
                     break;
                 case ACTION_BLUETOOTH_WRITE_FAIL:
-
                     Toast.makeText(sContext, "write data fail!" ,Toast.LENGTH_SHORT).show();
                     break;
                 case ACTION_BLUETOOTH_WRITE_SUCCESS:
@@ -92,21 +98,27 @@ public class ClientSocketActivity extends Activity {
 
                     break;
                 case ACTION_BLUETOOTH_DATA_RECIEVED:
-                    String success = String.valueOf(msg.getData().getInt("DATA_REV_FROM_BT_SUC"));
-                    String error = String.valueOf(msg.getData().getInt("DATA_REV_FROM_BT_ERR"));
-                    String revData = msg.getData().getString("DATA_REV_FROM_BT");
+                    String revData = msg.getData().getString(BluetoothService.recieveDataFlag);
 
-                    LogDataSB.append(device.getName()+":"+revData + "\n");
+                    LogDataSB.append(revData + "\n");
                     dataRevTV.setText(LogDataSB.toString());
                     scrollView.fullScroll(ScrollView.FOCUS_DOWN);
-                    successTV.setText(success);
-                    errorTV.setText(error);
-//                    Toast.makeText(sContext, revData ,Toast.LENGTH_SHORT).show();
                     break;
 
                 case ACTION_BLUETOOTH_REQ_SEND_DATA:
                     String data = dataSendET.getText().toString();
                     String num = packetNumET.getText().toString();
+
+                    if(mBluetoothService == null || BluetoothService.btSocket == null)
+                    {
+                        Toast.makeText(sContext, "Not connected!" ,Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if(data.equals(""))
+                    {
+                        Toast.makeText(sContext, "Input what you want to send!" ,Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
                     if(!num.equals(""))
                     {
@@ -233,7 +245,8 @@ public class ClientSocketActivity extends Activity {
                     dataRevTV.setText("");
                     successTV.setText("");
                     errorTV.setText("");
-                    LogDataSB.delete(0, LogDataSB.length()-1);
+                    LogDataSB.delete(0, LogDataSB.length());
+
                     mBluetoothService.resetCounter();
                     break;
 
@@ -244,6 +257,29 @@ public class ClientSocketActivity extends Activity {
                 case ACTION_BLUETOOTH_UPDATE_CHANNLE_INFO:
                     successTV.setText(""+(int)Protocol.scid);
                     errorTV.setText(""+(int)Protocol.dcid);
+                    break;
+
+                case ACTION_BLUETOOTH_REQ_DISC_CH:
+                    if(mBluetoothService != null && BluetoothService.btSocket != null)
+                    {
+                        mBluetoothService.WriteCMD(device, Protocol.createCommandReq(Common.EProtocolName.PN_A2S_CDELETE_RFCOMMN_CH,
+                                Protocol.getCurIdentifier(), AppPeference.AppName.getBytes()));
+                    }
+                    else
+                    {
+                        Toast.makeText(sContext, "not connected!" ,Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case ACTION_BLUETOOTH_REQ_CONNECT_CH:
+                    if(mBluetoothService != null && BluetoothService.btSocket == null)
+                    {
+                        device = _bluetooth.getRemoteDevice("FC:35:E6:85:BE:73");
+                        mBluetoothService.connect(device, AppPeference.MY_UUID);
+                    }
+                    else
+                    {
+                        Toast.makeText(sContext, "Already Connected!" ,Toast.LENGTH_SHORT).show();
+                    }
                     break;
             }
         }
@@ -296,6 +332,7 @@ public class ClientSocketActivity extends Activity {
         filter.addAction(BluetoothService.ACTION_BLUETOOTH_WRITE_FAIL);
         filter.addAction(BluetoothService.ACTION_BLUETOOTH_DATA_RECIEVED);
         filter.addAction(BluetoothService.ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO);
+        filter.addAction(BluetoothService.ACTION_BLUETOOTH_DATA_RECIEVED);
 
 
         registerReceiver(messageReceiver, filter);
@@ -365,13 +402,15 @@ public class ClientSocketActivity extends Activity {
 
     public void onDiscBtnClicked(View view)
     {
-        mBluetoothService.disconnect();
+        Message msg = handler.obtainMessage(ClientSocketActivity.ACTION_BLUETOOTH_REQ_DISC_CH);
+        handler.sendMessage(msg);
+        //mBluetoothService.disconnect();
     }
 
     public void onConncBtnClicked(View view)
     {
-        device = _bluetooth.getRemoteDevice("FC:35:E6:85:BE:73");
-        mBluetoothService.connect(device, AppPeference.MY_UUID);
+        Message msg = handler.obtainMessage(ClientSocketActivity.ACTION_BLUETOOTH_REQ_CONNECT_CH);
+        handler.sendMessage(msg);
     }
 
     public void onClearBtnClicked(View view)
@@ -437,14 +476,9 @@ public class ClientSocketActivity extends Activity {
 
             }else if(action
                     .equals(BluetoothService.ACTION_BLUETOOTH_DATA_RECIEVED)) {
-                dataLength = intent.getIntExtra("DATA_REV_FROM_BT_LENGTH", 0);
-                StringExtra = new String(intent.getStringExtra("DATA_REV_FROM_BT"));
-                int suc = intent.getIntExtra("DATA_REV_FROM_BT_SUC",0);
-                int err = intent.getIntExtra("DATA_REV_FROM_BT_ERR",0);
-                Log.d(TAG, "data rev len: "+dataLength +" data :"+StringExtra);
-                bundle.putString("DATA_REV_FROM_BT", StringExtra);
-                bundle.putInt("DATA_REV_FROM_BT_SUC",suc);
-                bundle.putInt("DATA_REV_FROM_BT_ERR",err);
+                StringExtra = intent.getStringExtra(BluetoothService.recieveDataFlag);
+
+                bundle.putString(BluetoothService.recieveDataFlag, StringExtra);
                 Message msg = handler
                         .obtainMessage(ClientSocketActivity.ACTION_BLUETOOTH_DATA_RECIEVED);
                 msg.setData(bundle);

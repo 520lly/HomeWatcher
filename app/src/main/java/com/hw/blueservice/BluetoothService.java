@@ -28,8 +28,9 @@ public class BluetoothService extends Service {
     private static final String TAG = "HomeWatcher";
     private BluetoothAdapter mAdapter;
     private final IBinder binder = new BluetoothBinder();
-    private static BluetoothSocket btSocket = null;
+    public static BluetoothSocket btSocket = null;
     private BluetoothDevice connectedDevice;
+
     private int lastSeq = -1;
 
     private int count = 0;
@@ -44,6 +45,7 @@ public class BluetoothService extends Service {
     public static final String ACTION_BLUETOOTH_CONNECTION_LOST= AppPeference.AppName +"action_bluetooth_connection_lost";
     public static final String ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO= AppPeference.AppName +"action_bluetooth_update_channel_infot";
 
+    public static String recieveDataFlag = "RECV_DATA";
 
     private ConnectThread mConnectThread;
 
@@ -264,6 +266,7 @@ public class BluetoothService extends Service {
         int curLen = 0;
         byte state;
         int dataU16 = 0;
+        StringBuilder sb = new StringBuilder();
 
         packetType = byarr[curLen];
         Log.d(TAG, "packetType = " + Common.statePacketType[packetType]);
@@ -362,6 +365,18 @@ public class BluetoothService extends Service {
                             Log.d(TAG, "dcid = "+ rspPacket.dcid);
                             Protocol.dcid = (char)rspPacket.dcid;
                             sendBroadcast(new Intent(ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO).putExtra("scid",rspPacket.scid).putExtra("dcid",rspPacket.dcid));
+
+                            sb.delete(0,sb.length());
+                            sb.append("Recieved rspPacket: ");
+                            sb.append("code="+(int)rspPacket.code);
+                            sb.append(" identifier="+(int)rspPacket.identifier);
+                            sb.append(" len="+(int)rspPacket.len);
+                            sb.append(" result="+(int)rspPacket.result);
+                            sb.append(" scid="+rspPacket.scid);
+                            sb.append(" dcid="+rspPacket.dcid);
+                            Log.d(TAG, sb.toString());
+                            sendBroadcast(new Intent(ACTION_BLUETOOTH_DATA_RECIEVED).putExtra(recieveDataFlag, sb.toString()));
+
                             break;
 
                         case Common.EResponsePacketFieldIndex.RspPacketFieldIndexPAYLOAD:
@@ -381,14 +396,25 @@ public class BluetoothService extends Service {
                             {
                                 state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexDETECTEDBAD;
                             }
+                            sb.delete(0,sb.length());
+                            sb.append("Recieved rspPacket: ");
+                            sb.append("code="+(int)rspPacket.code);
+                            sb.append(" identifier="+(int)rspPacket.identifier);
+                            sb.append(" len="+(int)rspPacket.len);
+                            sb.append(" result="+(int)rspPacket.result);
+                            sb.append(" scid="+rspPacket.scid);
+                            sb.append(" dcid="+rspPacket.dcid);
+                            sb.append(" data="+rspPacket.data);
 
-                            Log.d(TAG, "respacket code="+(int)rspPacket.code+"  indentifier="+(int)rspPacket.identifier+
-                                    "  len="+(int)rspPacket.len+"  result="+(int)rspPacket.result+"  scid="+rspPacket.scid+
-                                    "  dcid="+rspPacket.dcid+"  data="+rspPacket.data);
+                            Log.d(TAG, sb.toString());
+
+                            sendBroadcast(new Intent(ACTION_BLUETOOTH_DATA_RECIEVED).putExtra(recieveDataFlag, sb.toString()));
+
                             break;
 
                         case Common.EResponsePacketFieldIndex.RspPacketFieldIndexFINISH:
                             Log.d(TAG, "state = "+Common.stateResPacket[state]);
+
                             break;
 
                         case Common.EResponsePacketFieldIndex.RspPacketFieldIndexDETECTEDBAD:

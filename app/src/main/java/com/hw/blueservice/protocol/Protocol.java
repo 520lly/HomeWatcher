@@ -21,7 +21,7 @@ public class Protocol {
     static public char seq= 0;                             //Default seq
     static public char dcid = 0;                           //Default dcid
     static public byte seqIndex = 3;                       //Default packet sequence index
-    static public final int MAX_DATA_PACKET_PAYLOAD_SIZE = 990 - BasicPacketHeaderLen -DataPacketHeaderLen;
+    static public final int MAX_DATA_PACKET_PAYLOAD_SIZE = 65536 - BasicPacketHeaderLen -DataPacketHeaderLen;
     static public final int MIN_DATA_PACKET_PAYLOAD_SIZE = BasicPacketHeaderLen -DataPacketHeaderLen + 1;
 
 
@@ -178,6 +178,7 @@ public class Protocol {
 
         return dataPacket;
     }
+
 
 
 
