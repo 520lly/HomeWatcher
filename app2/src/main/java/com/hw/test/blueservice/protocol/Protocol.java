@@ -12,7 +12,7 @@ public class Protocol {
 
     static public byte curIdentifier = 0;
     static public int BasicPacketHeaderLen = 1;
-    static public int CommandPacketHeaderLen = 5;
+    static public int CommandPacketHeaderLen = 6;
     static public int DataPacketHeaderLen = 12;
     static public int DataPacketDefaultLen = 30 - BasicPacketHeaderLen -DataPacketHeaderLen;
     static public byte DataPacketSourceType = 0;           //Android source type
@@ -54,14 +54,15 @@ public class Protocol {
     {
         uint8_t code;
         uint8_t identifier;
-        uint16_t scid;
         uint8_t len;
+        uint8_t type;
+        uint16_t scid;
         uint8_t *data;
 
     }
     CommandPacketHeaderLen = 6
      */
-    static public byte[] createCommandReq(byte code, byte id, byte[] data)
+    static public byte[] createCommandReq(byte code, byte id, byte type, byte[] data)
     {
         int len = data.length;
         int offset = CommandPacketHeaderLen + BasicPacketHeaderLen;
@@ -76,12 +77,14 @@ public class Protocol {
         Log.d(TAG,"code cmdPacket[1] = "+(int)cmdPacket[1]);
         cmdPacket[2] = id;
         Log.d(TAG,"identifier cmdPacket[2] = "+(int)cmdPacket[2]);
-        cmdPacket[3] = (byte)0;                                     //scid lsb
-        Log.d(TAG,"len cmdPacket[4] = "+(int)cmdPacket[3]);
-        cmdPacket[4] = (byte)0;                                     //scid msb
-        Log.d(TAG,"len cmdPacket[5] = "+(int)cmdPacket[4]);
-        cmdPacket[5] = (byte)len;                                   //Payload length
-        Log.d(TAG,"len cmdPacket[3] = "+(int)cmdPacket[5]);
+        cmdPacket[3] = (byte)len;                                   //Payload length
+        Log.d(TAG,"len cmdPacket[3] = "+(int)cmdPacket[3]);
+        cmdPacket[4] = type;                                        //data type
+        Log.d(TAG,"len cmdPacket[4] = "+(int)cmdPacket[4]);
+        cmdPacket[5] = (byte)0;                                     //scid lsb
+        Log.d(TAG,"len cmdPacket[4] = "+(int)cmdPacket[5]);
+        cmdPacket[6] = (byte)0;                                     //scid msb
+        Log.d(TAG,"len cmdPacket[5] = "+(int)cmdPacket[6]);
 
         //CommandPacketPayload
         for(int i = 0; i < len; i++)

@@ -269,7 +269,7 @@ public class BluetoothService extends Service {
         StringBuilder sb = new StringBuilder();
 
         packetType = byarr[curLen];
-        Log.d(TAG, "packetType = " + Common.statePacketType[packetType]);
+        Log.d(TAG, "packetType = " + Common.statePacketType[packetType]+"   bytes="+bytes);
         ptLen--;
         curLen++;
 
@@ -367,7 +367,7 @@ public class BluetoothService extends Service {
                             sendBroadcast(new Intent(ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO).putExtra("scid",rspPacket.scid).putExtra("dcid",rspPacket.dcid));
 
                             sb.delete(0,sb.length());
-                            sb.append("Recieved rspPacket: ");
+                            sb.append("[Recieved rspPacket]: ");
                             sb.append("code="+(int)rspPacket.code);
                             sb.append(" identifier="+(int)rspPacket.identifier);
                             sb.append(" len="+(int)rspPacket.len);
@@ -383,9 +383,10 @@ public class BluetoothService extends Service {
                             Log.d(TAG, "RspPacketFieldIndexPAYLOAD");
                             if(rspPacket.len == ptLen)
                             {
-                                for(int i = 0; i < ptLen ; i++)
+                                rspPacket.data = new ArrayList();
+                                for(int i = 1; i <= ptLen ; i++)
                                 {
-                                    rspPacket.data[i] = byarr[Common.RES_PACKET_HEADER_LEN + i];
+                                    rspPacket.data.add((char)byarr[Common.RES_PACKET_HEADER_LEN + i]);
                                 }
                                 ptLen -= rspPacket.len;
                                 curLen += rspPacket.len;
@@ -397,7 +398,7 @@ public class BluetoothService extends Service {
                                 state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexDETECTEDBAD;
                             }
                             sb.delete(0,sb.length());
-                            sb.append("Recieved rspPacket: ");
+                            sb.append("[Recieved rspPacket]: ");
                             sb.append("code="+(int)rspPacket.code);
                             sb.append(" identifier="+(int)rspPacket.identifier);
                             sb.append(" len="+(int)rspPacket.len);
@@ -442,7 +443,7 @@ public class BluetoothService extends Service {
                             ptLen--;
                             curLen++;
                             state = Common.EDataPacketFieldIndex.DataPacketFieldIndexLEN2;
-                            Log.d(TAG, "code = "+(int)dataPacket.len1);
+                            Log.d(TAG, "len1 = "+(int)dataPacket.len1);
                             break;
 
                         case Common.EDataPacketFieldIndex.DataPacketFieldIndexLEN2:
@@ -450,7 +451,7 @@ public class BluetoothService extends Service {
                             ptLen--;
                             curLen++;
                             state = Common.EDataPacketFieldIndex.DataPacketFieldIndexST;
-                            Log.d(TAG, "identifier = "+(int)dataPacket.len2);
+                            Log.d(TAG, "len1 = "+(int)dataPacket.len2);
                             break;
 
                         case Common.EDataPacketFieldIndex.DataPacketFieldIndexST:
@@ -458,7 +459,7 @@ public class BluetoothService extends Service {
                             ptLen--;
                             curLen++;
                             state = Common.EDataPacketFieldIndex.DataPacketFieldIndexCFLAG;
-                            Log.d(TAG, "len = "+(int)dataPacket.st);
+                            Log.d(TAG, "st = "+(int)dataPacket.st);
                             break;
 
                         case Common.EDataPacketFieldIndex.DataPacketFieldIndexCFLAG:
@@ -466,7 +467,7 @@ public class BluetoothService extends Service {
                             ptLen--;
                             curLen++;
                             state = Common.EDataPacketFieldIndex.DataPacketFieldIndexSEQ;
-                            Log.d(TAG, "result = "+(int)dataPacket.cflag);
+                            Log.d(TAG, "cflag = "+(int)dataPacket.cflag);
                             break;
                         
                         case Common.EDataPacketFieldIndex.DataPacketFieldIndexSEQ:
@@ -482,11 +483,11 @@ public class BluetoothService extends Service {
                             tmp = pt&0xff;
                             //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen]+"    a="+a);
                             dataU16 += (tmp<<8 & 0x0000ffff);
-                            dataPacket.scid = dataU16;
+                            dataPacket.seq = dataU16;
                             ptLen--;
                             curLen++;
                             state = Common.EDataPacketFieldIndex.DataPacketFieldIndexSCID;
-                            Log.d(TAG, "scid = "+ dataPacket.scid);
+                            Log.d(TAG, "seq = "+ dataPacket.seq);
                             //sendBroadcast(new Intent(ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO).putExtra("scid",dataPacket.scid).putExtra("dcid",dataPacket.dcid));
                             break;
 
@@ -495,20 +496,20 @@ public class BluetoothService extends Service {
                             tmp = pt;
                             tmp = pt&0xff;
                             dataU16 += tmp;
-                            Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    tmp="+tmp);
+                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    tmp="+tmp);
                             ptLen--;
                             curLen++;
 
                             pt = byarr[curLen];
                             tmp = pt&0xff;
-                            Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen]+"    tmp="+tmp);
+                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen]+"    tmp="+tmp);
                             dataU16 += (tmp<<8 & 0x0000ffff);
                             dataPacket.scid = dataU16;
                             ptLen--;
                             curLen++;
                             state = Common.EDataPacketFieldIndex.DataPacketFieldIndexDCID;
                             Log.d(TAG, "scid = "+ dataPacket.scid);
-                            sendBroadcast(new Intent(ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO).putExtra("scid",dataPacket.scid).putExtra("dcid",dataPacket.dcid));
+
                             break;
 
                         case Common.EDataPacketFieldIndex.DataPacketFieldIndexDCID:
@@ -530,7 +531,7 @@ public class BluetoothService extends Service {
                             curLen++;
                             state = Common.EDataPacketFieldIndex.DataPacketFieldIndexDSIZE;
                             Log.d(TAG, "dcid = "+ dataPacket.dcid);
-                            sendBroadcast(new Intent(ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO).putExtra("scid",dataPacket.scid).putExtra("dcid",dataPacket.dcid));
+
                             break;
 
                         case Common.EDataPacketFieldIndex.DataPacketFieldIndexDSIZE:
@@ -547,7 +548,7 @@ public class BluetoothService extends Service {
                             tmp = pt&0xff;
                             dataU16 += (tmp<<8 & 0x0000ffff);
                             //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    b="+b);
-                            dataPacket.dcid = dataU16;
+                            dataPacket.dsize = dataU16;
                             ptLen--;
                             curLen++;
                             state = Common.EDataPacketFieldIndex.DataPacketFieldIndexPAYLOAD;
@@ -558,10 +559,14 @@ public class BluetoothService extends Service {
                             Log.d(TAG, "DataPacketFieldIndexPAYLOAD");
                             if(dataPacket.dsize == ptLen)
                             {
-                                for(int i = 0; i < ptLen ; i++)
+                                dataPacket.data = new StringBuffer();
+                                for(int i = 1; i <= ptLen ; i++)
                                 {
-                                    dataPacket.data[i] = byarr[Common.RES_PACKET_HEADER_LEN + i];
+                                    Log.d(TAG, " "+(int)byarr[Common.DATA_PACKET_HEADER_LEN + i]);
+                                    dataPacket.data.append((char)byarr[Common.DATA_PACKET_HEADER_LEN + i]);
+                                    //dataPacket.data.add((char)byarr[Common.DATA_PACKET_HEADER_LEN + i]);
                                 }
+
                                 ptLen -= dataPacket.dsize;
                                 curLen += dataPacket.dsize;
                                 state = Common.EDataPacketFieldIndex.DataPacketFieldIndexFINISH;
@@ -572,9 +577,20 @@ public class BluetoothService extends Service {
                                 state = Common.EDataPacketFieldIndex.DataPacketFieldIndexDETECTEDBAD;
                             }
 
-                            Log.d(TAG, "respacket len1="+(int)dataPacket.len1+"  len2="+(int)dataPacket.len2+
-                                    "  st="+(int)dataPacket.st+"  cflag="+(int)dataPacket.cflag+"  scid="+dataPacket.scid+
-                                    "  dcid="+dataPacket.dcid+"  dsize="+dataPacket.dsize+"  data="+dataPacket.data);
+                            sb.delete(0,sb.length());
+                            sb.append("[Recieved dataPacket]: ");
+                            sb.append(" len1="+(int)dataPacket.len1);
+                            sb.append(" len2="+(int)dataPacket.len2);
+                            sb.append(" st="+(int)dataPacket.st);
+                            sb.append(" cflag="+(int)dataPacket.cflag);
+                            sb.append(" seq="+dataPacket.seq);
+                            sb.append(" scid="+dataPacket.scid);
+                            sb.append(" dcid="+dataPacket.dcid);
+                            sb.append(" dsize="+dataPacket.dsize);
+                            sb.append(" data="+dataPacket.data.toString());
+
+                            Log.d(TAG, sb.toString());
+                            sendBroadcast(new Intent(ACTION_BLUETOOTH_DATA_RECIEVED).putExtra(recieveDataFlag, sb.toString()));
                             break;
 
                         case Common.EDataPacketFieldIndex.DataPacketFieldIndexFINISH:

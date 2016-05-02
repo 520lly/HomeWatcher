@@ -142,7 +142,7 @@
       <file leaf-file-name="BluetoothService.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/BluetoothService.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="375" column="63" selection-start="14284" selection-end="14284" vertical-scroll-proportion="0.0" vertical-offset="4800" max-vertical-offset="9750">
+            <state line="615" column="19" selection-start="26100" selection-end="26100" vertical-scroll-proportion="0.0" vertical-offset="3713" max-vertical-offset="9990">
               <folding />
             </state>
           </provider>
@@ -151,19 +151,16 @@
       <file leaf-file-name="ClientSocketActivity.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/ClientSocketActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="77" column="78" selection-start="3231" selection-end="3231" vertical-scroll-proportion="0.0" vertical-offset="495" max-vertical-offset="7275">
-              <folding>
-                <element signature="e#2460#12569#0" expanded="true" />
-                <element signature="e#12562#12563#0" expanded="true" />
-              </folding>
+            <state line="207" column="34" selection-start="9006" selection-end="9006" vertical-scroll-proportion="0.0" vertical-offset="1605" max-vertical-offset="7275">
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AppPeference.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/main/AppPeference.java">
+      <file leaf-file-name="Protocol.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/Protocol.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="9" column="46" selection-start="255" selection-end="255" vertical-scroll-proportion="0.28301886" vertical-offset="0" max-vertical-offset="477">
+            <state line="229" column="34" selection-start="8259" selection-end="8259" vertical-scroll-proportion="0.8744395" vertical-offset="3015" max-vertical-offset="4305">
               <folding />
             </state>
           </provider>
@@ -172,16 +169,7 @@
       <file leaf-file-name="Common.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/Common.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="58" selection-start="705" selection-end="730" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2205">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Protocol.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/Protocol.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="64" selection-start="1112" selection-end="1112" vertical-scroll-proportion="0.0" vertical-offset="1125" max-vertical-offset="3525">
+            <state line="35" column="25" selection-start="864" selection-end="864" vertical-scroll-proportion="0.0" vertical-offset="225" max-vertical-offset="2325">
               <folding />
             </state>
           </provider>
@@ -1898,7 +1886,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/app3/src/main/java/com/hw/app3/blueservice/DiscoveryActivity.java" />
         <option value="$PROJECT_DIR$/app3/src/main/java/com/hw/app3/blueservice/OBEXActivity.java" />
         <option value="$PROJECT_DIR$/app3/src/main/java/com/hw/app3/blueservice/BTmain.java" />
         <option value="$PROJECT_DIR$/app3/src/main/java/com/hw/app3/blueservice/ServerSocketActivity.java" />
@@ -1915,16 +1902,12 @@
         <option value="$PROJECT_DIR$/app5/src/main/java/com/hw/app5/blueservice/ServerSocketActivity.java" />
         <option value="$PROJECT_DIR$/app5/src/main/java/com/hw/app5/blueservice/BTmain.java" />
         <option value="$PROJECT_DIR$/app5/src/main/java/com/hw/app5/main/MainActivity.java" />
-        <option value="$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/protocol/Common.java" />
         <option value="$PROJECT_DIR$/app3/src/main/java/com/hw/app3/blueservice/protocol/Common.java" />
         <option value="$PROJECT_DIR$/app4/src/main/java/com/hw/app4/blueservice/protocol/Common.java" />
         <option value="$PROJECT_DIR$/app5/src/main/java/com/hw/app5/blueservice/protocol/Common.java" />
         <option value="$PROJECT_DIR$/app/build.gradle" />
         <option value="$PROJECT_DIR$/app2/src/main/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/ResPacket.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/DataPacket.java" />
-        <option value="$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/protocol/ResPacket.java" />
         <option value="$PROJECT_DIR$/app3/src/main/java/com/hw/app3/blueservice/protocol/ResPacket.java" />
         <option value="$PROJECT_DIR$/app4/src/main/java/com/hw/app4/blueservice/protocol/Protocol.java" />
         <option value="$PROJECT_DIR$/app5/src/main/java/com/hw/app5/blueservice/protocol/Protocol.java" />
@@ -1932,7 +1915,6 @@
         <option value="$PROJECT_DIR$/app2/src/main/java/com/hw/test/main/AppPeference.java" />
         <option value="$PROJECT_DIR$/app4/src/main/java/com/hw/app4/main/AppPeference.java" />
         <option value="$PROJECT_DIR$/app5/src/main/java/com/hw/app5/main/AppPeference.java" />
-        <option value="$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/ClientSocketActivity.java" />
         <option value="$PROJECT_DIR$/app3/src/main/java/com/hw/app3/blueservice/protocol/Protocol.java" />
         <option value="$PROJECT_DIR$/app3/src/main/java/com/hw/app3/blueservice/ClientSocketActivity.java" />
         <option value="$PROJECT_DIR$/app3/src/main/java/com/hw/app3/main/AppPeference.java" />
@@ -1944,11 +1926,17 @@
         <option value="$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/BluetoothService.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/client_socket.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/InfoPacket.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/Common.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/BluetoothService.java" />
         <option value="$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/protocol/Protocol.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/Protocol.java" />
+        <option value="$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/ClientSocketActivity.java" />
+        <option value="$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/protocol/Common.java" />
+        <option value="$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/protocol/DataPacket.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/Common.java" />
+        <option value="$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/protocol/ResPacket.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/ResPacket.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/DataPacket.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/BluetoothService.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/ClientSocketActivity.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/Protocol.java" />
       </list>
     </option>
   </component>
@@ -3113,8 +3101,8 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
       <pane id="Scope" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -3478,20 +3466,20 @@
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32806325" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.33596838" sideWeight="0.4996651" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Android" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3768116" sideWeight="0.4996651" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32953784" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32938075" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32953784" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.20897521" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18218352" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32806325" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3293092" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32938075" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -3513,15 +3501,6 @@
     <breakpoint-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app5/src/main/java/com/hw/app5/blueservice/BTmain.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="61" column="46" selection-start="1757" selection-end="1757" vertical-scroll-proportion="0.33333334" vertical-offset="709" max-vertical-offset="3495">
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app5/src/main/java/com/hw/app5/main/MainActivity.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="20" column="21" selection-start="531" selection-end="531" vertical-scroll-proportion="0.621118" vertical-offset="0" max-vertical-offset="1680">
@@ -3562,9 +3541,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app2/build/source/r/debug/com/hw/test/R.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="27" column="75" selection-start="1348" selection-end="1348" vertical-scroll-proportion="-0.75774646" vertical-offset="599" max-vertical-offset="41160">
-          <folding />
-        </state>
+        <state line="27" column="75" selection-start="1348" selection-end="1348" vertical-scroll-proportion="-0.75774646" vertical-offset="599" max-vertical-offset="41160" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app2/src/main/java/com/hw/test/main/MainActivity.java">
@@ -3629,13 +3606,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/protocol/DataPacket.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="16" column="13" selection-start="372" selection-end="372" vertical-scroll-proportion="0.48096192" vertical-offset="0" max-vertical-offset="499">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app4/src/main/java/com/hw/app4/blueservice/protocol/Common.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="5" column="13" selection-start="95" selection-end="95" vertical-scroll-proportion="0.15432099" vertical-offset="0" max-vertical-offset="2205">
@@ -3665,20 +3635,6 @@
           <folding>
             <element signature="imports" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/ResPacket.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="20" selection-start="631" selection-end="655" vertical-scroll-proportion="0.66132265" vertical-offset="0" max-vertical-offset="499">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/protocol/Common.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="13" selection-start="95" selection-end="95" vertical-scroll-proportion="-2.2530863" vertical-offset="1170" max-vertical-offset="2205">
-          <folding />
         </state>
       </provider>
     </entry>
@@ -3847,41 +3803,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/BluetoothService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="375" column="63" selection-start="14284" selection-end="14284" vertical-scroll-proportion="0.0" vertical-offset="4800" max-vertical-offset="9750">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/DataPacket.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="21" selection-start="401" selection-end="401" vertical-scroll-proportion="0.0" vertical-offset="12" max-vertical-offset="495">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/Common.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="58" selection-start="705" selection-end="730" vertical-scroll-proportion="0.0" vertical-offset="249" max-vertical-offset="2205">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/protocol/Protocol.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="62" selection-start="1114" selection-end="1114" vertical-scroll-proportion="0.33333334" vertical-offset="171" max-vertical-offset="3525">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/Protocol.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="64" selection-start="1112" selection-end="1112" vertical-scroll-proportion="0.0" vertical-offset="1125" max-vertical-offset="3525">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/BluetoothService.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="81" column="29" selection-start="2874" selection-end="2874" vertical-scroll-proportion="0.33189654" vertical-offset="761" max-vertical-offset="9360">
@@ -3889,26 +3810,86 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/main/AppPeference.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="9" column="46" selection-start="255" selection-end="255" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="270">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/protocol/Common.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="138" column="4" selection-start="5116" selection-end="5116" vertical-scroll-proportion="0.71276593" vertical-offset="1735" max-vertical-offset="2310">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/protocol/Protocol.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="96" column="5" selection-start="1679" selection-end="3315" vertical-scroll-proportion="0.68944097" vertical-offset="1077" max-vertical-offset="3570">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/ClientSocketActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="370" column="30" selection-start="15229" selection-end="15229" vertical-scroll-proportion="0.7190776" vertical-offset="4667" max-vertical-offset="6675">
+        <state line="71" column="96" selection-start="3094" selection-end="3094" vertical-scroll-proportion="0.3638298" vertical-offset="459" max-vertical-offset="6675">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/protocol/DataPacket.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="25" column="22" selection-start="587" selection-end="587" vertical-scroll-proportion="0.79787236" vertical-offset="0" max-vertical-offset="510">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app2/src/main/java/com/hw/test/blueservice/protocol/ResPacket.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="18" column="27" selection-start="539" selection-end="539" vertical-scroll-proportion="0.5531915" vertical-offset="10" max-vertical-offset="480">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/DataPacket.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="27" column="23" selection-start="607" selection-end="607" vertical-scroll-proportion="0.0" vertical-offset="55" max-vertical-offset="525">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/ResPacket.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="24" column="20" selection-start="660" selection-end="660" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="480">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/Common.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="35" column="25" selection-start="864" selection-end="864" vertical-scroll-proportion="0.0" vertical-offset="225" max-vertical-offset="2325">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/BluetoothService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="615" column="19" selection-start="26100" selection-end="26100" vertical-scroll-proportion="0.0" vertical-offset="3713" max-vertical-offset="9990">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/ClientSocketActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="77" column="78" selection-start="3231" selection-end="3231" vertical-scroll-proportion="0.0" vertical-offset="495" max-vertical-offset="7275">
-          <folding>
-            <element signature="e#2460#12569#0" expanded="true" />
-            <element signature="e#12562#12563#0" expanded="true" />
-          </folding>
+        <state line="207" column="34" selection-start="9006" selection-end="9006" vertical-scroll-proportion="0.0" vertical-offset="1605" max-vertical-offset="7275">
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/main/AppPeference.java">
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hw/blueservice/protocol/Protocol.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="46" selection-start="255" selection-end="255" vertical-scroll-proportion="0.28301886" vertical-offset="0" max-vertical-offset="477">
+        <state line="229" column="34" selection-start="8259" selection-end="8259" vertical-scroll-proportion="0.8744395" vertical-offset="3015" max-vertical-offset="4305">
           <folding />
         </state>
       </provider>

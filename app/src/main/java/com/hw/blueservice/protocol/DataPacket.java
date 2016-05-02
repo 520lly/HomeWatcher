@@ -1,5 +1,7 @@
 package com.hw.blueservice.protocol;
 
+import java.util.ArrayList;
+
 /**
  * Created by saic on 4/20/16.
  *
@@ -23,5 +25,5 @@ public class DataPacket {
     public int  scid;
     public int  dcid;
     public int  dsize;
-    public byte data[];
+    public StringBuffer data;
 }

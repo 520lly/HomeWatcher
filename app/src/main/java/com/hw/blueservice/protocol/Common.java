@@ -11,6 +11,7 @@ public class Common {
 
 
     public static final int RES_PACKET_HEADER_LEN = 8;
+    public static final int DATA_PACKET_HEADER_LEN = 12;
 
     public enum EErrorCode
     {
@@ -137,5 +138,12 @@ public class Common {
                     "DETECTEDBAD",
             };
 
+    public static class EAttachedDataType
+    {
+        static final public byte ADT_RESERVED       =0x00;
+        static final public byte ADT_STRING         =0x01;
+        static final public byte ADT_NUMBER         =0x02;
+        static final public byte ADT_CHANNEL        =0x03;
+    }
 
 }

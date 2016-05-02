@@ -2,6 +2,8 @@ package com.hw.blueservice.protocol;
 
 import com.hw.blueservice.protocol.*;
 
+import java.util.ArrayList;
+
 /**
  * Created by saic on 4/19/16.
  *
@@ -21,6 +23,6 @@ public class ResPacket {
     public byte result;
     public int scid;
     public int dcid;
-    public byte data[];
+    public ArrayList data;
 
 }

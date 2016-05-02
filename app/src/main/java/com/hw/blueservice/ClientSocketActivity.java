@@ -29,6 +29,8 @@ import com.hw.main.R;
 import java.util.UUID;
 import com.hw.blueservice.protocol.*;
 
+import javax.sql.PooledConnection;
+
 
 public class ClientSocketActivity extends Activity {
     private static final String TAG = "HomeWatcher";
@@ -74,8 +76,10 @@ public class ClientSocketActivity extends Activity {
                     Toast.makeText(sContext, "connect successed!" ,Toast.LENGTH_SHORT).show();
                     if(mBluetoothService != null && BluetoothService.btSocket != null)
                     {
-                        mBluetoothService.WriteCMD(device, Protocol.createCommandReq(Common.EProtocolName.PN_A2S_CREATE_RFCOMMN_CH,
-                                Protocol.getCurIdentifier(), AppPeference.AppName.getBytes()));
+                        byte[] cmdpacket = Protocol.createCommandReq(Common.EProtocolName.PN_A2S_CREATE_RFCOMMN_CH,
+                                Protocol.getCurIdentifier(), Common.EAttachedDataType.ADT_STRING, AppPeference.AppName.getBytes());
+
+                        mBluetoothService.WriteCMD(device, Protocol.createBasicPakcet(Common.EPacketType.PT_CTR, cmdpacket));
                     }
 
                     break;
@@ -201,7 +205,7 @@ public class ClientSocketActivity extends Activity {
 
 
                                 i+=userDataLen;
-                                Log.d(TAG,"i = "+i+"   testMaxPayload.length = "+testMaxPayload.length);
+                                //Log.d(TAG,"i = "+i+"   testMaxPayload.length = "+testMaxPayload.length);
                                 if(i > testMaxPayload.length)
                                 {
                                     i-=userDataLen;
@@ -223,8 +227,9 @@ public class ClientSocketActivity extends Activity {
                         }
 
                         Log.d(TAG,"DataPacketMaxLen = "+testMaxPayload.length);
-                        if(mBluetoothService.WriteCMD(device, Protocol.createDataPacket(Protocol.len1, Protocol.len2,
-                                Protocol.seqIndex, Protocol.seq, Protocol.dcid, testMaxPayload)))
+                        byte[] dataPacket =  Protocol.createDataPacket(Protocol.len1, Protocol.len2,
+                                Protocol.seqIndex, Protocol.seq, Protocol.dcid, testMaxPayload);
+                        if(mBluetoothService.WriteCMD(device,Protocol.createBasicPakcet(Common.EPacketType.PT_DATA, dataPacket) ))
                         {
                             LogDataSB.append("Me:"+data + "* "+testMaxPayload.length+"\n");
                             dataRevTV.setText(LogDataSB.toString());
@@ -243,8 +248,8 @@ public class ClientSocketActivity extends Activity {
                     break;
                 case ACTION_BLUETOOTH_REQ_CLEAR_REV_DATA:
                     dataRevTV.setText("");
-                    successTV.setText("");
-                    errorTV.setText("");
+                    //successTV.setText("");
+                    //errorTV.setText("");
                     LogDataSB.delete(0, LogDataSB.length());
 
                     mBluetoothService.resetCounter();
@@ -263,7 +268,7 @@ public class ClientSocketActivity extends Activity {
                     if(mBluetoothService != null && BluetoothService.btSocket != null)
                     {
                         mBluetoothService.WriteCMD(device, Protocol.createCommandReq(Common.EProtocolName.PN_A2S_CDELETE_RFCOMMN_CH,
-                                Protocol.getCurIdentifier(), AppPeference.AppName.getBytes()));
+                                Protocol.getCurIdentifier(), Common.EAttachedDataType.ADT_STRING, AppPeference.AppName.getBytes()));
                     }
                     else
                     {

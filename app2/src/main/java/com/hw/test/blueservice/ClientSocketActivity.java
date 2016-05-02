@@ -69,7 +69,7 @@ public class ClientSocketActivity extends Activity {
                     if(mBluetoothService != null)
                     {
                         mBluetoothService.WriteCMD(device, Protocol.createCommandReq(Common.EProtocolName.PN_A2S_CREATE_RFCOMMN_CH,
-                                Protocol.getCurIdentifier(), AppPeference.AppName.getBytes()));
+                                Protocol.getCurIdentifier(),Common.EAttachedDataType.ADT_STRING, AppPeference.AppName.getBytes()));
                     }
 
                     break;
