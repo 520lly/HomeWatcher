@@ -21,8 +21,11 @@ public class ResPacket {
     public byte identifier;
     public byte len;
     public byte result;
-    public int scid;
-    public int dcid;
+    public byte type;
+    public byte scidMsb;
+    public byte scidLsb;
+    public byte dcidMsb;
+    public byte dcidLsb;
     public ArrayList data;
 
 }

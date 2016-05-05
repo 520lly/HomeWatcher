@@ -47,6 +47,11 @@ public class BluetoothService extends Service {
 
     public static String recieveDataFlag = "RECV_DATA";
 
+    private int curSize = 0;
+    private int totSize = 0;
+    private int dataChkStored = 0;
+    private byte packetTypeStored = 0;
+    private byte[] cachedPacket = new byte[Common.MAX_BASIC_PACKET_LEN];
     private ConnectThread mConnectThread;
 
     @Override
@@ -245,6 +250,10 @@ public class BluetoothService extends Service {
             try {
                 while (true) {
                     bytes = instream.read(buffer);
+//                    for(int i = 0; i< bytes ; i++)
+//                    {
+//                        Log.d(TAG,"buffer["+i+"] = "+buffer[i]);
+//                    }
                     parserPacketData(buffer,bytes);
                     //WriteCMD(connectedDevice, buffer);
                 }
@@ -260,351 +269,562 @@ public class BluetoothService extends Service {
     }
 
     public void parserPacketData(byte[] byarr, int bytes){
-        byte packetType;
+        Log.d(TAG, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>parserPacketData  bytes ="+bytes);
+        byte packetType = 0;
         byte pt = 0;
         int ptLen = bytes;
+        int curLen = 0;
+        byte state =  BasicPacket.parserIndex.parserIndexTYPE;
+        int dataU16 = 0;
+        byte dataChk = 0;
+        StringBuilder sb = new StringBuilder();
+
+        while(ptLen > 0 && state < BasicPacket.parserIndex.parserIndexBADDETECTED)
+        {
+            Log.d(TAG, ">>>>>bytes = "+bytes +" ptLen = "+ptLen +" curLen = "+curLen + "  state = "+BasicPacket.stateBasicPacket[state] +
+                   "  byarr["+curLen+"] = " +byarr[curLen]+"<<<<<");
+            switch (state)
+            {
+                case  BasicPacket.parserIndex.parserIndexTYPE:
+                    packetType = byarr[curLen];
+                    Log.d(TAG, "byarr[curLen] = " + Common.statePacketType[byarr[curLen]]+"   bytes="+bytes);
+                    ptLen--;
+                    curLen++;
+                    state = BasicPacket.parserIndex.parserIndexLEN0;
+                    break;
+                case  BasicPacket.parserIndex.parserIndexLEN0:
+                    pt = byarr[curLen];
+                    int a = pt;
+                    a = pt&0xff;
+                    dataU16 += a;
+                    ptLen--;
+                    curLen++;
+                    Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    dataU16="+dataU16);
+                    state = BasicPacket.parserIndex.parserIndexLEN1;
+
+                    break;
+                case  BasicPacket.parserIndex.parserIndexLEN1:
+                    pt = byarr[curLen];
+                    int b = pt;
+                    b = pt&0xff;
+                    dataU16 += b;
+                    ptLen--;
+                    curLen++;
+                    Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    dataU16="+dataU16);
+                    state = BasicPacket.parserIndex.parserIndexLEN2;
+                    break;
+                case  BasicPacket.parserIndex.parserIndexLEN2:
+                    pt = byarr[curLen];
+                    int c = pt;
+                    c = pt&0xff;
+                    dataU16 += c;
+                    ptLen--;
+                    curLen++;
+                    Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    dataU16="+dataU16);
+                    state = BasicPacket.parserIndex.parserIndexLEN3;
+                    break;
+                case  BasicPacket.parserIndex.parserIndexLEN3:
+                    pt = byarr[curLen];
+                    int d = pt;
+                    d = pt&0xff;
+                    dataU16 += d;
+                    ptLen--;
+                    curLen++;
+                    Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    dataU16="+dataU16);
+                    state = BasicPacket.parserIndex.parserIndexDATACHK;
+                    break;
+                case  BasicPacket.parserIndex.parserIndexDATACHK:
+                    dataChk = byarr[curLen];
+                    Log.d(TAG, "dataChk = "+dataChk);
+
+                    ptLen--;
+                    curLen++;
+                    state = BasicPacket.parserIndex.parserIndexHEADERCHK;
+                    break;
+
+                case  BasicPacket.parserIndex.parserIndexHEADERCHK:
+                    byte headerChk = calcChecksum(byarr, BasicPacket.basicPacketHeaderLen -1);
+                    if(byarr[curLen] == headerChk || (0x100 - headerChk == byarr[curLen]))
+                    {
+                        ptLen -= 1;
+                        curLen +=1;
+
+
+                        packetTypeStored= packetType;
+                        totSize = dataU16;
+                        dataChkStored = dataChk;
+                        Log.d(TAG, "dataChkStored = "+ dataChkStored);
+                        if(dataU16 == ptLen)
+                        {
+                            Log.d(TAG, "checksum success ! received signle packet");
+                            for(int i = 0; i < ptLen; i++)
+                            {
+                                cachedPacket[i] = byarr[i+BasicPacket.basicPacketHeaderLen];
+                            }
+                            state = BasicPacket.parserIndex.parserIndexDATA;
+
+                        }
+                        else
+                        {
+                            Log.d(TAG, "checksum success ! Push header packet into list");
+                            for(int i = 0; i < ptLen; i++)
+                            {
+                                cachedPacket[i] = byarr[i+BasicPacket.basicPacketHeaderLen];
+                            }
+                            curSize +=  ptLen;
+
+                            state = BasicPacket.parserIndex.parserIndexFINISH;
+                        }
+                    }
+                    else
+                    {
+                        if(totSize > (curSize + bytes))
+                        {
+                            Log.d(TAG, "checksum failed ! Push segment packet into list");
+                            for(int i = 0; i < bytes; i++)
+                            {
+                                cachedPacket[i+curSize] = byarr[i];
+                            }
+                            curSize +=  bytes;
+
+                            state = BasicPacket.parserIndex.parserIndexFINISH;
+                        }
+                        else if(totSize == (curSize + bytes))
+                        {
+                            Log.d(TAG, "checksum failed ! Push last segment packet into list");
+                            for(int i = 0; i < bytes; i++)
+                            {
+                                cachedPacket[i+curSize] = byarr[i];
+                            }
+                            curSize +=  ptLen;
+
+                            state = BasicPacket.parserIndex.parserIndexDATA;
+                        }
+                        else
+                        {
+                            Log.d(TAG, "checksum failed ! TODO need to handle error!");
+                            state = BasicPacket.parserIndex.parserIndexBADDETECTED;
+                        }
+                    }
+                    break;
+
+                case  BasicPacket.parserIndex.parserIndexDATA:
+                    curLen +=ptLen;
+                    ptLen -= ptLen;
+
+                    if(dataChk == dataChkStored || dataChk == (0x100 - dataChkStored))
+                    {
+                        parserBasicPacket(packetTypeStored, cachedPacket);
+                        state = BasicPacket.parserIndex.parserIndexFINISH;
+                    }
+                    else
+                    {
+                        Log.d(TAG, "data checksum failed ! TODO need to handle error!");
+                        state = BasicPacket.parserIndex.parserIndexBADDETECTED;
+                    }
+
+                    break;
+
+                case  BasicPacket.parserIndex.parserIndexFINISH:
+                    ptLen -= ptLen;
+                    curLen +=ptLen;
+                    break;
+                case  BasicPacket.parserIndex.parserIndexBADDETECTED:
+                    curLen +=ptLen;
+                    ptLen -= ptLen;
+                    break;
+            }
+        }
+        resetParserBasicPacket();
+    }
+
+    public void parserBasicPacket(byte packetType, byte[] cachedPacket)
+    {
+        Log.d(TAG, ">>>>>>>>>>>>>>>>>>>>parserBasicPacket  packetType = "+packetType +"    parserBasicPacket totSize = "+totSize +" cachedPacket = "+ cachedPacket.length);
+
+            switch (packetType)
+            {
+                case Common.EPacketType.PT_RESERVED:
+                    break;
+                case Common.EPacketType.PT_CTR:
+                    parserCtrPacket(cachedPacket);
+                    break;
+                case Common.EPacketType.PT_DATA:
+                    parserDataPacket(cachedPacket);
+                    break;
+                case Common.EPacketType.PT_RES:
+                    parserRspPacket(cachedPacket);
+                    break;
+                case Common.EPacketType.PT_INFO:
+                    parserInfoPacket(cachedPacket);
+                    break;
+
+            }
+
+    }
+
+    public void resetParserBasicPacket()
+    {
+        curSize = 0;
+        totSize = 0;
+        dataChkStored = 0;
+        packetTypeStored = 0;
+        for(int i = 0 ; i <Common.MAX_BASIC_PACKET_LEN; i++)
+        {
+            cachedPacket[i] = 0;
+        }
+        Log.d(TAG, "resetParserBasicPacket");
+    }
+
+    public void parserCtrPacket(byte[] cachedPacket)
+    {
+        Log.d(TAG, "parserCtrPacket");
+    }
+
+    public void parserDataPacket(byte[] cachedPacket)
+    {
+        Log.d(TAG, ">>>>>>>>>>>>>>>>>>>>>>>>parserDataPacket");
+        byte pt = 0;
+        int ptLen = totSize;
         int curLen = 0;
         byte state;
         int dataU16 = 0;
         StringBuilder sb = new StringBuilder();
 
-        packetType = byarr[curLen];
-        Log.d(TAG, "packetType = " + Common.statePacketType[packetType]+"   bytes="+bytes);
-        ptLen--;
-        curLen++;
-
-        switch (packetType)
+        DataPacket dataPacket = new DataPacket();
+        int tmp;
+        state = Common.EDataPacketFieldIndex.DataPacketFieldIndexST;
+        while(ptLen > 0 && state < Common.EDataPacketFieldIndex.DataPacketFieldIndexFINISH)
         {
-            case Common.EPacketType.PT_RESERVED:
-                break;
-            case Common.EPacketType.PT_CTR:
-                break;
-            case Common.EPacketType.PT_RES:
-                ResPacket rspPacket = new ResPacket();
-                state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexCODE;
-                while(ptLen > 0 && state < Common.EResponsePacketFieldIndex.RspPacketFieldIndexFINISH)
-                {
-                    Log.d(TAG, "ptLen = "+ptLen +" curLen = "+curLen + "  state = "+Common.stateResPacket[state] +
-                            "   pt = " + (int)pt + "  byarr["+curLen+"] = " +byarr[curLen]);
+            Log.d(TAG, "ptLen = "+ptLen +" curLen = "+curLen + "  state = "+Common.stateDataPacket[state] +
+                    "   pt = " + (int)pt + "  cachedPacket["+curLen+"] = " +cachedPacket[curLen]);
 
 
-                    switch (state)
+            switch (state)
+            {
+                case Common.EDataPacketFieldIndex.DataPacketFieldIndexST:
+                    dataPacket.st = cachedPacket[curLen];
+                    ptLen--;
+                    curLen++;
+                    state = Common.EDataPacketFieldIndex.DataPacketFieldIndexCFLAG;
+                    Log.d(TAG, "st = "+(int)dataPacket.st);
+                    break;
+
+                case Common.EDataPacketFieldIndex.DataPacketFieldIndexCFLAG:
+                    dataPacket.cflag = cachedPacket[curLen];
+                    ptLen--;
+                    curLen++;
+                    state = Common.EDataPacketFieldIndex.DataPacketFieldIndexSEQ;
+                    Log.d(TAG, "cflag = "+(int)dataPacket.cflag);
+                    break;
+
+                case Common.EDataPacketFieldIndex.DataPacketFieldIndexSEQ:
+                    pt = cachedPacket[curLen];
+                    tmp = pt;
+                    tmp = pt&0xff;
+                    dataU16 += tmp;
+                    //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    a="+a);
+                    ptLen--;
+                    curLen++;
+
+                    pt = cachedPacket[curLen];
+                    tmp = pt&0xff;
+                    //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen]+"    a="+a);
+                    dataU16 += (tmp<<8 & 0x0000ffff);
+                    dataPacket.seq = dataU16;
+                    ptLen--;
+                    curLen++;
+                    state = Common.EDataPacketFieldIndex.DataPacketFieldIndexSCID;
+                    Log.d(TAG, "seq = "+ dataPacket.seq);
+                    //sendBroadcast(new Intent(ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO).putExtra("scid",dataPacket.scid).putExtra("dcid",dataPacket.dcid));
+                    break;
+
+                case Common.EDataPacketFieldIndex.DataPacketFieldIndexSCID:
+                    pt = cachedPacket[curLen];
+                    tmp = pt;
+                    tmp = pt&0xff;
+                    dataU16 += tmp;
+                    //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    tmp="+tmp);
+                    ptLen--;
+                    curLen++;
+
+                    pt = cachedPacket[curLen];
+                    tmp = pt&0xff;
+                    //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen]+"    tmp="+tmp);
+                    dataU16 += (tmp<<8 & 0x0000ffff);
+                    dataPacket.scid = dataU16;
+                    ptLen--;
+                    curLen++;
+                    state = Common.EDataPacketFieldIndex.DataPacketFieldIndexDCID;
+                    Log.d(TAG, "scid = "+ dataPacket.scid);
+
+                    break;
+
+                case Common.EDataPacketFieldIndex.DataPacketFieldIndexDCID:
+                    dataU16 = 0;
+                    pt = cachedPacket[curLen];
+                    tmp = pt;
+                    tmp = pt&0xff;
+                    dataU16 += tmp;
+                    //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    b="+b);
+                    ptLen--;
+                    curLen++;
+
+                    pt = cachedPacket[curLen];
+                    tmp = pt&0xff;
+                    dataU16 += (tmp<<8 & 0x0000ffff);
+                    //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    b="+b);
+                    dataPacket.dcid = dataU16;
+                    ptLen--;
+                    curLen++;
+                    state = Common.EDataPacketFieldIndex.DataPacketFieldIndexDSIZE;
+                    Log.d(TAG, "dcid = "+ dataPacket.dcid);
+
+                    break;
+
+                case Common.EDataPacketFieldIndex.DataPacketFieldIndexDSIZE:
+                    dataU16 = 0;
+                    pt = cachedPacket[curLen];
+                    tmp = pt;
+                    tmp = pt&0xff;
+                    dataU16 += tmp;
+                    //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    b="+b);
+                    ptLen--;
+                    curLen++;
+
+                    pt = cachedPacket[curLen];
+                    tmp = pt&0xff;
+                    dataU16 += (tmp<<8 & 0x0000ffff);
+                    //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    b="+b);
+                    dataPacket.dsize = dataU16;
+                    ptLen--;
+                    curLen++;
+                    state = Common.EDataPacketFieldIndex.DataPacketFieldIndexPAYLOAD;
+                    Log.d(TAG, "dsize = "+ dataPacket.dsize);
+
+                    break;
+                case Common.EDataPacketFieldIndex.DataPacketFieldIndexPAYLOAD:
+                    Log.d(TAG, "DataPacketFieldIndexPAYLOAD");
+                    if(dataPacket.dsize == ptLen)
                     {
-                        case Common.EResponsePacketFieldIndex.RspPacketFieldIndexCODE:
-                            rspPacket.code = byarr[curLen];
-                            ptLen--;
-                            curLen++;
-                            state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexIDENTIFIER;
-                            Log.d(TAG, "code = "+(int)rspPacket.code);
-                            break;
+                        dataPacket.data = new StringBuffer();
+                        for(int i = 1; i <= ptLen ; i++)
+                        {
+                            Log.d(TAG, " "+(int)cachedPacket[Common.DATA_PACKET_HEADER_LEN + i]);
+                            dataPacket.data.append((char)cachedPacket[Common.DATA_PACKET_HEADER_LEN + i]);
+                            //dataPacket.data.add((char)byarr[Common.DATA_PACKET_HEADER_LEN + i]);
+                        }
 
-                        case Common.EResponsePacketFieldIndex.RspPacketFieldIndexIDENTIFIER:
-                            rspPacket.identifier = byarr[curLen];
-                            ptLen--;
-                            curLen++;
-                            state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexLEN;
-                            Log.d(TAG, "identifier = "+(int)rspPacket.identifier);
-                            break;
+                        ptLen -= dataPacket.dsize;
+                        curLen += dataPacket.dsize;
+                        state = Common.EDataPacketFieldIndex.DataPacketFieldIndexFINISH;
 
-                        case Common.EResponsePacketFieldIndex.RspPacketFieldIndexLEN:
-                            rspPacket.len = byarr[curLen];
-                            ptLen--;
-                            curLen++;
-                            state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexRESULT;
-                            Log.d(TAG, "len = "+(int)rspPacket.len);
-                            break;
-
-                        case Common.EResponsePacketFieldIndex.RspPacketFieldIndexRESULT:
-                            rspPacket.result = byarr[curLen];
-                            ptLen--;
-                            curLen++;
-                            state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexSCID;
-                            Log.d(TAG, "result = "+(int)rspPacket.result);
-                            break;
-
-                        case Common.EResponsePacketFieldIndex.RspPacketFieldIndexSCID:
-                            pt = byarr[curLen];
-                            int a = pt;
-                            a = pt&0xff;
-                            dataU16 += a;
-                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    a="+a);
-                            ptLen--;
-                            curLen++;
-
-                            pt = byarr[curLen];
-                            a = pt&0xff;
-                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen]+"    a="+a);
-                            dataU16 += (a<<8 & 0x0000ffff);
-                            rspPacket.scid = dataU16;
-                            ptLen--;
-                            curLen++;
-                            state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexDCID;
-                            Log.d(TAG, "scid = "+ rspPacket.scid);
-                            Protocol.scid = (char)rspPacket.scid;
-                            sendBroadcast(new Intent(ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO).putExtra("scid",rspPacket.scid).putExtra("dcid",rspPacket.dcid));
-                            break;
-
-                        case Common.EResponsePacketFieldIndex.RspPacketFieldIndexDCID:
-                            dataU16 = 0;
-                            pt = byarr[curLen];
-                            int b = pt;
-                            b = pt&0xff;
-                            dataU16 += b;
-                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    b="+b);
-                            ptLen--;
-                            curLen++;
-
-                            pt = byarr[curLen];
-                            b = pt&0xff;
-                            dataU16 += (b<<8 & 0x0000ffff);
-                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    b="+b);
-                            rspPacket.dcid = dataU16;
-                            ptLen--;
-                            curLen++;
-                            state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexPAYLOAD;
-                            Log.d(TAG, "dcid = "+ rspPacket.dcid);
-                            Protocol.dcid = (char)rspPacket.dcid;
-                            sendBroadcast(new Intent(ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO).putExtra("scid",rspPacket.scid).putExtra("dcid",rspPacket.dcid));
-
-                            sb.delete(0,sb.length());
-                            sb.append("[Recieved rspPacket]: ");
-                            sb.append("code="+(int)rspPacket.code);
-                            sb.append(" identifier="+(int)rspPacket.identifier);
-                            sb.append(" len="+(int)rspPacket.len);
-                            sb.append(" result="+(int)rspPacket.result);
-                            sb.append(" scid="+rspPacket.scid);
-                            sb.append(" dcid="+rspPacket.dcid);
-                            Log.d(TAG, sb.toString());
-                            sendBroadcast(new Intent(ACTION_BLUETOOTH_DATA_RECIEVED).putExtra(recieveDataFlag, sb.toString()));
-
-                            break;
-
-                        case Common.EResponsePacketFieldIndex.RspPacketFieldIndexPAYLOAD:
-                            Log.d(TAG, "RspPacketFieldIndexPAYLOAD");
-                            if(rspPacket.len == ptLen)
-                            {
-                                rspPacket.data = new ArrayList();
-                                for(int i = 1; i <= ptLen ; i++)
-                                {
-                                    rspPacket.data.add((char)byarr[Common.RES_PACKET_HEADER_LEN + i]);
-                                }
-                                ptLen -= rspPacket.len;
-                                curLen += rspPacket.len;
-                                state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexFINISH;
-
-                            }
-                            else
-                            {
-                                state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexDETECTEDBAD;
-                            }
-                            sb.delete(0,sb.length());
-                            sb.append("[Recieved rspPacket]: ");
-                            sb.append("code="+(int)rspPacket.code);
-                            sb.append(" identifier="+(int)rspPacket.identifier);
-                            sb.append(" len="+(int)rspPacket.len);
-                            sb.append(" result="+(int)rspPacket.result);
-                            sb.append(" scid="+rspPacket.scid);
-                            sb.append(" dcid="+rspPacket.dcid);
-                            sb.append(" data="+rspPacket.data);
-
-                            Log.d(TAG, sb.toString());
-
-                            sendBroadcast(new Intent(ACTION_BLUETOOTH_DATA_RECIEVED).putExtra(recieveDataFlag, sb.toString()));
-
-                            break;
-
-                        case Common.EResponsePacketFieldIndex.RspPacketFieldIndexFINISH:
-                            Log.d(TAG, "state = "+Common.stateResPacket[state]);
-
-                            break;
-
-                        case Common.EResponsePacketFieldIndex.RspPacketFieldIndexDETECTEDBAD:
-                            Log.d(TAG, "state = "+Common.stateResPacket[state]);
-                            break;
                     }
-                }
-
-
-                break;
-            case Common.EPacketType.PT_DATA:
-                DataPacket dataPacket = new DataPacket();
-                int tmp;
-                state = Common.EDataPacketFieldIndex.DataPacketFieldIndexLEN1;
-                while(ptLen > 0 && state < Common.EDataPacketFieldIndex.DataPacketFieldIndexFINISH)
-                {
-                    Log.d(TAG, "ptLen = "+ptLen +" curLen = "+curLen + "  state = "+Common.stateDataPacket[state] +
-                            "   pt = " + (int)pt + "  byarr["+curLen+"] = " +byarr[curLen]);
-
-
-                    switch (state)
+                    else
                     {
-                        case Common.EDataPacketFieldIndex.DataPacketFieldIndexLEN1:
-                            dataPacket.len1 = byarr[curLen];
-                            ptLen--;
-                            curLen++;
-                            state = Common.EDataPacketFieldIndex.DataPacketFieldIndexLEN2;
-                            Log.d(TAG, "len1 = "+(int)dataPacket.len1);
-                            break;
-
-                        case Common.EDataPacketFieldIndex.DataPacketFieldIndexLEN2:
-                            dataPacket.len2 = byarr[curLen];
-                            ptLen--;
-                            curLen++;
-                            state = Common.EDataPacketFieldIndex.DataPacketFieldIndexST;
-                            Log.d(TAG, "len1 = "+(int)dataPacket.len2);
-                            break;
-
-                        case Common.EDataPacketFieldIndex.DataPacketFieldIndexST:
-                            dataPacket.st = byarr[curLen];
-                            ptLen--;
-                            curLen++;
-                            state = Common.EDataPacketFieldIndex.DataPacketFieldIndexCFLAG;
-                            Log.d(TAG, "st = "+(int)dataPacket.st);
-                            break;
-
-                        case Common.EDataPacketFieldIndex.DataPacketFieldIndexCFLAG:
-                            dataPacket.cflag = byarr[curLen];
-                            ptLen--;
-                            curLen++;
-                            state = Common.EDataPacketFieldIndex.DataPacketFieldIndexSEQ;
-                            Log.d(TAG, "cflag = "+(int)dataPacket.cflag);
-                            break;
-                        
-                        case Common.EDataPacketFieldIndex.DataPacketFieldIndexSEQ:
-                            pt = byarr[curLen];
-                            tmp = pt;
-                            tmp = pt&0xff;
-                            dataU16 += tmp;
-                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    a="+a);
-                            ptLen--;
-                            curLen++;
-
-                            pt = byarr[curLen];
-                            tmp = pt&0xff;
-                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen]+"    a="+a);
-                            dataU16 += (tmp<<8 & 0x0000ffff);
-                            dataPacket.seq = dataU16;
-                            ptLen--;
-                            curLen++;
-                            state = Common.EDataPacketFieldIndex.DataPacketFieldIndexSCID;
-                            Log.d(TAG, "seq = "+ dataPacket.seq);
-                            //sendBroadcast(new Intent(ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO).putExtra("scid",dataPacket.scid).putExtra("dcid",dataPacket.dcid));
-                            break;
-
-                        case Common.EDataPacketFieldIndex.DataPacketFieldIndexSCID:
-                            pt = byarr[curLen];
-                            tmp = pt;
-                            tmp = pt&0xff;
-                            dataU16 += tmp;
-                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    tmp="+tmp);
-                            ptLen--;
-                            curLen++;
-
-                            pt = byarr[curLen];
-                            tmp = pt&0xff;
-                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen]+"    tmp="+tmp);
-                            dataU16 += (tmp<<8 & 0x0000ffff);
-                            dataPacket.scid = dataU16;
-                            ptLen--;
-                            curLen++;
-                            state = Common.EDataPacketFieldIndex.DataPacketFieldIndexDCID;
-                            Log.d(TAG, "scid = "+ dataPacket.scid);
-
-                            break;
-
-                        case Common.EDataPacketFieldIndex.DataPacketFieldIndexDCID:
-                            dataU16 = 0;
-                            pt = byarr[curLen];
-                            tmp = pt;
-                            tmp = pt&0xff;
-                            dataU16 += tmp;
-                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    b="+b);
-                            ptLen--;
-                            curLen++;
-
-                            pt = byarr[curLen];
-                            tmp = pt&0xff;
-                            dataU16 += (tmp<<8 & 0x0000ffff);
-                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    b="+b);
-                            dataPacket.dcid = dataU16;
-                            ptLen--;
-                            curLen++;
-                            state = Common.EDataPacketFieldIndex.DataPacketFieldIndexDSIZE;
-                            Log.d(TAG, "dcid = "+ dataPacket.dcid);
-
-                            break;
-
-                        case Common.EDataPacketFieldIndex.DataPacketFieldIndexDSIZE:
-                            dataU16 = 0;
-                            pt = byarr[curLen];
-                            tmp = pt;
-                            tmp = pt&0xff;
-                            dataU16 += tmp;
-                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    b="+b);
-                            ptLen--;
-                            curLen++;
-
-                            pt = byarr[curLen];
-                            tmp = pt&0xff;
-                            dataU16 += (tmp<<8 & 0x0000ffff);
-                            //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    b="+b);
-                            dataPacket.dsize = dataU16;
-                            ptLen--;
-                            curLen++;
-                            state = Common.EDataPacketFieldIndex.DataPacketFieldIndexPAYLOAD;
-                            Log.d(TAG, "dsize = "+ dataPacket.dsize);
-
-                            break;
-                        case Common.EDataPacketFieldIndex.DataPacketFieldIndexPAYLOAD:
-                            Log.d(TAG, "DataPacketFieldIndexPAYLOAD");
-                            if(dataPacket.dsize == ptLen)
-                            {
-                                dataPacket.data = new StringBuffer();
-                                for(int i = 1; i <= ptLen ; i++)
-                                {
-                                    Log.d(TAG, " "+(int)byarr[Common.DATA_PACKET_HEADER_LEN + i]);
-                                    dataPacket.data.append((char)byarr[Common.DATA_PACKET_HEADER_LEN + i]);
-                                    //dataPacket.data.add((char)byarr[Common.DATA_PACKET_HEADER_LEN + i]);
-                                }
-
-                                ptLen -= dataPacket.dsize;
-                                curLen += dataPacket.dsize;
-                                state = Common.EDataPacketFieldIndex.DataPacketFieldIndexFINISH;
-
-                            }
-                            else
-                            {
-                                state = Common.EDataPacketFieldIndex.DataPacketFieldIndexDETECTEDBAD;
-                            }
-
-                            sb.delete(0,sb.length());
-                            sb.append("[Recieved dataPacket]: ");
-                            sb.append(" len1="+(int)dataPacket.len1);
-                            sb.append(" len2="+(int)dataPacket.len2);
-                            sb.append(" st="+(int)dataPacket.st);
-                            sb.append(" cflag="+(int)dataPacket.cflag);
-                            sb.append(" seq="+dataPacket.seq);
-                            sb.append(" scid="+dataPacket.scid);
-                            sb.append(" dcid="+dataPacket.dcid);
-                            sb.append(" dsize="+dataPacket.dsize);
-                            sb.append(" data="+dataPacket.data.toString());
-
-                            Log.d(TAG, sb.toString());
-                            sendBroadcast(new Intent(ACTION_BLUETOOTH_DATA_RECIEVED).putExtra(recieveDataFlag, sb.toString()));
-                            break;
-
-                        case Common.EDataPacketFieldIndex.DataPacketFieldIndexFINISH:
-                            Log.d(TAG, "state = "+Common.stateResPacket[state]);
-                            break;
-
-                        case Common.EDataPacketFieldIndex.DataPacketFieldIndexDETECTEDBAD:
-                            Log.d(TAG, "state = "+Common.stateResPacket[state]);
-                            break;
+                        state = Common.EDataPacketFieldIndex.DataPacketFieldIndexDETECTEDBAD;
                     }
-                }
 
-                break;
+                    sb.delete(0, sb.length());
+                    sb.append("[Recieved dataPacket]: ");
+                    sb.append(" st="+(int)dataPacket.st);
+                    sb.append(" cflag="+(int)dataPacket.cflag);
+                    sb.append(" seq="+dataPacket.seq);
+                    sb.append(" scid="+dataPacket.scid);
+                    sb.append(" dcid="+dataPacket.dcid);
+                    sb.append(" dsize="+dataPacket.dsize);
+                    sb.append(" data="+dataPacket.data.toString());
+
+                    Log.d(TAG, sb.toString());
+                    sendBroadcast(new Intent(ACTION_BLUETOOTH_DATA_RECIEVED).putExtra(recieveDataFlag, sb.toString()));
+                    break;
+
+                case Common.EDataPacketFieldIndex.DataPacketFieldIndexFINISH:
+                    Log.d(TAG, "state = "+Common.stateResPacket[state]);
+                    break;
+
+                case Common.EDataPacketFieldIndex.DataPacketFieldIndexDETECTEDBAD:
+                    Log.d(TAG, "state = "+Common.stateResPacket[state]);
+                    break;
+            }
         }
+
+    }
+
+    public void parserRspPacket( byte[] cachedPacket)
+    {
+        Log.d(TAG, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>parserRspPacket");
+        byte pt = 0;
+        int ptLen = totSize;
+        int curLen = 0;
+        byte state;
+        int dataU16 = 0;
+        int tmp = 0;
+        StringBuilder sb = new StringBuilder();
+
+        ResPacket rspPacket = new ResPacket();
+        state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexCODE;
+        while(ptLen > 0 && state < Common.EResponsePacketFieldIndex.RspPacketFieldIndexFINISH)
+        {
+            Log.d(TAG, "ptLen = "+ptLen +" curLen = "+curLen + "  state = "+Common.stateResPacket[state] +
+                    "   pt = " + (int)pt + "  cachedPacket["+curLen+"] = " +cachedPacket[curLen]);
+
+
+            switch (state)
+            {
+                case Common.EResponsePacketFieldIndex.RspPacketFieldIndexCODE:
+                    rspPacket.code = cachedPacket[curLen];
+                    ptLen--;
+                    curLen++;
+                    state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexIDENTIFIER;
+                    Log.d(TAG, "code = "+(int)rspPacket.code);
+                    break;
+
+                case Common.EResponsePacketFieldIndex.RspPacketFieldIndexIDENTIFIER:
+                    rspPacket.identifier = cachedPacket[curLen];
+                    ptLen--;
+                    curLen++;
+                    state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexLEN;
+                    Log.d(TAG, "identifier = "+(int)rspPacket.identifier);
+                    break;
+
+                case Common.EResponsePacketFieldIndex.RspPacketFieldIndexLEN:
+                    rspPacket.len = cachedPacket[curLen];
+                    ptLen--;
+                    curLen++;
+                    state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexRESULT;
+                    Log.d(TAG, "len = "+(int)rspPacket.len);
+                    break;
+
+                case Common.EResponsePacketFieldIndex.RspPacketFieldIndexRESULT:
+                    rspPacket.result = cachedPacket[curLen];
+                    ptLen--;
+                    curLen++;
+                    state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexTYPE;
+                    Log.d(TAG, "result = "+(int)rspPacket.result);
+                    break;
+
+                case Common.EResponsePacketFieldIndex.RspPacketFieldIndexTYPE:
+                    rspPacket.type = cachedPacket[curLen];
+                    ptLen--;
+                    curLen++;
+                    state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexSCIDMSB;
+                    Log.d(TAG, "type = "+(int)rspPacket.type);
+                    break;
+
+                case Common.EResponsePacketFieldIndex.RspPacketFieldIndexSCIDMSB:
+                    rspPacket.scidMsb = cachedPacket[curLen];
+                    pt = cachedPacket[curLen];
+                    tmp = pt&0xff;
+                    dataU16 += (tmp<<8 & 0x0000ffff);
+                    //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    a="+a);
+                    ptLen--;
+                    curLen++;
+                    state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexSCIDLSB;
+                    break;
+                case Common.EResponsePacketFieldIndex.RspPacketFieldIndexSCIDLSB:
+                    rspPacket.scidLsb = cachedPacket[curLen];
+                    pt = cachedPacket[curLen];
+                    tmp = pt&0xff;
+                    dataU16 += tmp;
+                    //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen]+"    a="+a);
+                    ptLen--;
+                    curLen++;
+                    state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexDCIDMSB;
+                    Log.d(TAG, "scid = "+ dataU16);
+                    Protocol.scid = (char)dataU16;
+                    sendBroadcast(new Intent(ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO).putExtra("scid",dataU16).putExtra("dcid",dataU16));
+                    break;
+                case Common.EResponsePacketFieldIndex.RspPacketFieldIndexDCIDMSB:
+                    dataU16 = 0;
+                    pt = cachedPacket[curLen];
+                    rspPacket.dcidMsb = cachedPacket[curLen];
+                    tmp = pt&0xff;
+                    dataU16 += (tmp<<8 & 0x0000ffff);
+                    //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    b="+b);
+                    ptLen--;
+                    curLen++;
+                    state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexDCIDLSB;
+                    break;
+
+                case Common.EResponsePacketFieldIndex.RspPacketFieldIndexDCIDLSB:
+                    pt = cachedPacket[curLen];
+                    rspPacket.dcidLsb = cachedPacket[curLen];
+                    tmp = pt&0xff;
+                    dataU16 += tmp;
+                    //Log.d(TAG, "byarr["+curLen+"] = "+byarr[curLen] +"    b="+b);
+                    ptLen--;
+                    curLen++;
+                    Protocol.dcid = (char)dataU16;
+                    sendBroadcast(new Intent(ACTION_BLUETOOTH_UPDATE_CHANNEL_INFO).putExtra("scid",dataU16).putExtra("dcid",dataU16));
+
+                    sb.delete(0,sb.length());
+                    sb.append("[Recieved rspPacket]: ");
+                    sb.append("code=" + (int) rspPacket.code);
+                    sb.append(" identifier="+(int)rspPacket.identifier);
+                    sb.append(" len="+(int)rspPacket.len);
+                    sb.append(" result="+(int)rspPacket.result);
+                    sb.append(" scidMsb="+rspPacket.scidMsb);
+                    sb.append(" scidLsb="+rspPacket.scidLsb);
+                    sb.append(" dcidMsb="+rspPacket.dcidMsb);
+                    sb.append(" dcidLsb="+rspPacket.dcidLsb);
+
+                    Log.d(TAG, sb.toString());
+                    sendBroadcast(new Intent(ACTION_BLUETOOTH_DATA_RECIEVED).putExtra(recieveDataFlag, sb.toString()));
+                    state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexPAYLOAD;
+                    break;
+
+                case Common.EResponsePacketFieldIndex.RspPacketFieldIndexPAYLOAD:
+                    Log.d(TAG, "RspPacketFieldIndexPAYLOAD");
+                    if(rspPacket.len == ptLen)
+                    {
+                        rspPacket.data = new ArrayList();
+                        for(int i = 1; i <= ptLen ; i++)
+                        {
+                            rspPacket.data.add((char)cachedPacket[Common.RES_PACKET_HEADER_LEN + i]);
+                        }
+                        ptLen -= rspPacket.len;
+                        curLen += rspPacket.len;
+                        state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexFINISH;
+
+                        sb.delete(0,sb.length());
+                        sb.append("[Recieved rspPacket]: ");
+                        sb.append("code=" + (int) rspPacket.code);
+                        sb.append(" identifier="+(int)rspPacket.identifier);
+                        sb.append(" len="+(int)rspPacket.len);
+                        sb.append(" result="+(int)rspPacket.result);
+                        sb.append(" scidMsb="+rspPacket.scidMsb);
+                        sb.append(" scidLsb="+rspPacket.scidLsb);
+                        sb.append(" dcidMsb="+rspPacket.dcidMsb);
+                        sb.append(" dcidLsb="+rspPacket.dcidLsb);
+
+                        Log.d(TAG, sb.toString());
+                        sendBroadcast(new Intent(ACTION_BLUETOOTH_DATA_RECIEVED).putExtra(recieveDataFlag, sb.toString()));
+
+                    }
+                    else
+                    {
+                        state = Common.EResponsePacketFieldIndex.RspPacketFieldIndexDETECTEDBAD;
+                    }
+
+                    break;
+
+                case Common.EResponsePacketFieldIndex.RspPacketFieldIndexFINISH:
+                    Log.d(TAG, "state = "+Common.stateResPacket[state]);
+
+                    break;
+
+                case Common.EResponsePacketFieldIndex.RspPacketFieldIndexDETECTEDBAD:
+                    Log.d(TAG, "state = "+Common.stateResPacket[state]);
+                    break;
+            }
+        }
+
+
+    }
+    public void parserInfoPacket(byte[] cachedPacket)
+    {
+        Log.d(TAG, "parserInfoPacket");
     }
 
     public void resetCounter()
@@ -646,6 +866,16 @@ public class BluetoothService extends Service {
 
     }
 
+    public byte calcChecksum(byte[] arr, int len)
+    {
+        byte checksum = 0;
+        for(int i = 0; i < len; i++)
+        {
+            checksum += arr[i];
+        }
+        Log.d(TAG, "calcChecksum checksum = "+checksum);
+        return checksum;
+    }
         /**
          * Indicate that the connection was lost and notify the UI Activity.
          */

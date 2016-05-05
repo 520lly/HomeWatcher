@@ -79,7 +79,7 @@ public class ClientSocketActivity extends Activity {
                         byte[] cmdpacket = Protocol.createCommandReq(Common.EProtocolName.PN_A2S_CREATE_RFCOMMN_CH,
                                 Protocol.getCurIdentifier(), Common.EAttachedDataType.ADT_STRING, AppPeference.AppName.getBytes());
 
-                        mBluetoothService.WriteCMD(device, Protocol.createBasicPakcet(Common.EPacketType.PT_CTR, cmdpacket));
+                        mBluetoothService.WriteCMD(device, Protocol.createBasicPacket(Common.EPacketType.PT_CTR, cmdpacket));
                     }
 
                     break;
@@ -227,9 +227,8 @@ public class ClientSocketActivity extends Activity {
                         }
 
                         Log.d(TAG,"DataPacketMaxLen = "+testMaxPayload.length);
-                        byte[] dataPacket =  Protocol.createDataPacket(Protocol.len1, Protocol.len2,
-                                Protocol.seqIndex, Protocol.seq, Protocol.dcid, testMaxPayload);
-                        if(mBluetoothService.WriteCMD(device,Protocol.createBasicPakcet(Common.EPacketType.PT_DATA, dataPacket) ))
+                        byte[] dataPacket =  Protocol.createDataPacket(Protocol.seqIndex, Protocol.seq, Protocol.dcid, testMaxPayload);
+                        if(mBluetoothService.WriteCMD(device,Protocol.createBasicPacket(Common.EPacketType.PT_DATA, dataPacket) ))
                         {
                             LogDataSB.append("Me:"+data + "* "+testMaxPayload.length+"\n");
                             dataRevTV.setText(LogDataSB.toString());

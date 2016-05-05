@@ -5,8 +5,6 @@ import java.util.ArrayList;
 /**
  * Created by saic on 4/20/16.
  *
- *  uint8_t len1;
-    uint8_t len2;
     uint8_t st;                     //indicate data source (Android or iOS)
     uint8_t cflag;                  //indicate packet Sequence
     uint16_t seq;
@@ -17,8 +15,6 @@ import java.util.ArrayList;
  *
  */
 public class DataPacket {
-    public byte len1;
-    public byte len2;
     public byte st;
     public byte cflag;
     public int  seq;

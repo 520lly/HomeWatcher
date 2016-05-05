@@ -5,7 +5,7 @@ package com.hw.blueservice.protocol;
  */
 public class Common {
 
-    public static final int MAX_PACKET_DATA_LEN = 128;
+    public static final int MAX_BASIC_PACKET_LEN = 65535;
     public static final int MAX_USER_DATA_LEN_DEFAULT = 1024;
     public static final int MAX_USER_CRCI_LEN_DEFAULT = 128;
 
@@ -37,7 +37,7 @@ public class Common {
         static final public byte PT_CTR      = 0x01;
         static final public byte PT_DATA     = 0x02;
         static final public byte PT_RES      = 0x03;
-        static final public byte PT_UNKNOWN  = 0x04;
+        static final public byte PT_INFO      = 0x04;
     }
 
     public static String[] statePacketType =
@@ -77,11 +77,14 @@ public class Common {
         static final public byte  RspPacketFieldIndexIDENTIFIER       = 0X01;                             //match with CmdPacket identifier
         static final public byte  RspPacketFieldIndexLEN              = 0X02;
         static final public byte  RspPacketFieldIndexRESULT           = 0X03;
-        static final public byte  RspPacketFieldIndexSCID             = 0X04;
-        static final public byte  RspPacketFieldIndexDCID             = 0X05;                                   //APP RFCOMM Channel or HMI UNIX Domain Socket Channel
-        static final public byte  RspPacketFieldIndexPAYLOAD          = 0X06;
-        static final public byte  RspPacketFieldIndexFINISH           = 0X07;
-        static final public byte  RspPacketFieldIndexDETECTEDBAD      = 0X08;
+        static final public byte  RspPacketFieldIndexTYPE             = 0X04;
+        static final public byte  RspPacketFieldIndexSCIDMSB          = 0X05;
+        static final public byte  RspPacketFieldIndexSCIDLSB          = 0X06;
+        static final public byte  RspPacketFieldIndexDCIDMSB          = 0X07;
+        static final public byte  RspPacketFieldIndexDCIDLSB          = 0X08;                                    //APP RFCOMM Channel or HMI UNIX Domain Socket Channel
+        static final public byte  RspPacketFieldIndexPAYLOAD          = 0X09;
+        static final public byte  RspPacketFieldIndexFINISH           = 0X0a;
+        static final public byte  RspPacketFieldIndexDETECTEDBAD      = 0X0b;
 
     }
     public static String[] stateResPacket =
@@ -90,8 +93,10 @@ public class Common {
                     "INDENTIFIER",
                     "LEN",
                     "RESULT",
-                    "SCID",
-                    "DCID",
+                    "SCID_MSB",
+                    "SCID_LSB",
+                    "DCID_MSB",
+                    "DCID_LSB",
                     "PAYLOAD",
                     "FINISH",
                     "DETECTEDBAD",
@@ -99,8 +104,6 @@ public class Common {
 
 
     /*
-    uint8_t len1;
-    uint8_t len2;
     uint8_t st;                     //indicate data source (Android or iOS)
     uint8_t cflag;                  //indicate packet Sequence
     uint16_t seq;
@@ -110,23 +113,19 @@ public class Common {
         */
     public class EDataPacketFieldIndex
     {
-        static final public byte  DataPacketFieldIndexLEN1             = 0X00;                                   //match with CmdPacket code
-        static final public byte  DataPacketFieldIndexLEN2             = 0X01;                             //match with CmdPacket identifier
-        static final public byte  DataPacketFieldIndexST               = 0X02;
-        static final public byte  DataPacketFieldIndexCFLAG            = 0X03;
-        static final public byte  DataPacketFieldIndexSEQ              = 0X04;
-        static final public byte  DataPacketFieldIndexSCID             = 0X05;
-        static final public byte  DataPacketFieldIndexDCID             = 0X06;                                   //APP RFCOMM Channel or HMI UNIX Domain Socket Channel
-        static final public byte  DataPacketFieldIndexDSIZE            = 0X07;                                  //APP RFCOMM Channel or HMI UNIX Domain Socket Channel
-        static final public byte  DataPacketFieldIndexPAYLOAD          = 0X08;
-        static final public byte  DataPacketFieldIndexFINISH           = 0X09;
-        static final public byte  DataPacketFieldIndexDETECTEDBAD      = 0X0A;
+        static final public byte  DataPacketFieldIndexST               = 0X01;
+        static final public byte  DataPacketFieldIndexCFLAG            = 0X02;
+        static final public byte  DataPacketFieldIndexSEQ              = 0X03;
+        static final public byte  DataPacketFieldIndexSCID             = 0X04;
+        static final public byte  DataPacketFieldIndexDCID             = 0X05;                                   //APP RFCOMM Channel or HMI UNIX Domain Socket Channel
+        static final public byte  DataPacketFieldIndexDSIZE            = 0X06;                                  //APP RFCOMM Channel or HMI UNIX Domain Socket Channel
+        static final public byte  DataPacketFieldIndexPAYLOAD          = 0X07;
+        static final public byte  DataPacketFieldIndexFINISH           = 0X08;
+        static final public byte  DataPacketFieldIndexDETECTEDBAD      = 0X09;
 
     }
     public static String[] stateDataPacket =
             {
-                    "LEN1",
-                    "LEN2",
                     "ST",
                     "CFLAG",
                     "SEQ",
